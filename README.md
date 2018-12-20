@@ -1,6 +1,6 @@
 # Past Demography
 
-## Infering the demographic history of *Senecio lautus* populations from the site frequency spectrum
+## Infering the demographic history of *Senecio lautus* populations
 
 This repository contains step-by-step instructions and code for infering demographic parameters of population pairs and triads of *Senecio lautus* using ```fastsimcoal```.
 
