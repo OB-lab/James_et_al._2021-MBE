@@ -1,11 +1,11 @@
 # getpopmap.pl generates a tab-delimited population specification file from a CVF file 
 # containing either two or three populations
 
-# Use: perl getpopmap.pl (0)input_vcf_file (1)output_popmap_file (2)number_of_pops 
-#      (3)name_pop1 (4)name_pop2 (5)name_pop3
+# Use: perl getpopmap.pl (0)input_vcf_file (1)output_popmap_file (2)name_pop1 (3)name_pop2 (4)name_pop3
 
 # Assumptions: 
-# - Sample names are composed by PopName-SampleID_PopName-SampleID (i.e. D12-291_D12-291)
+# - Sample names are composed by PopName-SampleID_PopName-SampleID (i.e. D12-291_D12-291). Most importantly, 
+#   the first part of the sample name should contain the population name followed by a hyphen.
 # - The header line containing the sample names is tab-delimitated and stats by #CHROM
 # - Sample names start at column number 10
 
@@ -25,28 +25,28 @@ while ($c==0) {
 		for (my $i=9; $i<scalar @col; $i++) { # Read sample names from header's column number 10 onwards
 			my @sn = split (/-/, $col[$i]); # Extract population name from the sample name
 			# If there are two populations, write the sample and population names in a new line in the output file...
-			if ($ARGV[2] == 2) {
-				if ($sn[0] eq $ARGV[3]) { # if the sample belongs to population 1
-					print OUT "$col[$i]\t$ARGV[3]\n"; 
+			if (length(@ARGV) == 2) {
+				if ($sn[0] eq $ARGV[2]) { # if the sample belongs to population 1
+					print OUT "$col[$i]\t$ARGV[2]\n"; 
 				}
-				if ($sn[0] eq $ARGV[4]) { # if the sample belongs to population 2
-					print OUT "$col[$i]\t$ARGV[4]\n";
+				if ($sn[0] eq $ARGV[3]) { # if the sample belongs to population 2
+					print OUT "$col[$i]\t$ARGV[3]\n";
 				}
 			}
 			# If there are three populations, write the sample and population names in a new line in the output file...
-			if ($ARGV[2] == 3) { 
-				if ($sn[0] eq $ARGV[3]) { # if the sample belongs to population 1
-					print OUT "$col[$i]\t$ARGV[3]\n"; 
+			if (length(@ARGV) == 3) { 
+				if ($sn[0] eq $ARGV[2]) { # if the sample belongs to population 1
+					print OUT "$col[$i]\t$ARGV[2]\n"; 
 				}
-				if ($sn[0] eq $ARGV[4]) { # if the sample belongs to population 2
+				if ($sn[0] eq $ARGV[3]) { # if the sample belongs to population 2
+					print OUT "$col[$i]\t$ARGV[3]\n";
+				}
+				if ($sn[0] eq $ARGV[4]) { # if the sample belongs to population 3
 					print OUT "$col[$i]\t$ARGV[4]\n";
-				}
-				if ($sn[0] eq $ARGV[5]) { # if the sample belongs to population 3
-					print OUT "$col[$i]\t$ARGV[5]\n";
 				}
 			}	
 		}
-		$c = 1; # Stop reading the file, header's useful information was already taken
+		$c = 1; # Stop reading the file because the header's useful information was already taken
 		}
 }
 
