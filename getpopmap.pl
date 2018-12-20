@@ -12,7 +12,7 @@
 use warnings;
 use strict;
 
-open (VcF, $ARGV[0]) or die; # Load the input VCF file
+open (VCF, $ARGV[0]) or die; # Load the input VCF file
 open (OUT, ">$ARGV[1]") or die; # Create the output file
 
 # Read the VCF file line per line until reaching the header and extracting the sample and population names
