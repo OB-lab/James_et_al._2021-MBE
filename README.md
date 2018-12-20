@@ -42,7 +42,7 @@ In this example, projections ```7``` and ```6``` maximise the number of kept SNP
 easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_folder -a
 ```
 
-```easySFS.py``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming of the input files, it should only be used the SFS files contained in the fastsimcoal directory. In this case, the ```input_jointMAFpop0_1.obs``` file. Beware this file name should be slightly modified as follow to be read by ```fastsimcoal```: ```input_jointMAFpop1_0.obs```.
+```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming of the input files, it should only be used the SFS files contained in the fastsimcoal directory. In this case, the ```input_jointMAFpop0_1.obs``` file. Beware this file name should be slightly modified as follow to be read by ```fastsimcoal```: ```input_jointMAFpop1_0.obs```.
 
 ### Getting the template file
 
