@@ -25,7 +25,7 @@ while ($c==0) {
 		for (my $i=9; $i<scalar @col; $i++) { # Read sample names from header's column number 10 onwards
 			my @sn = split (/-/, $col[$i]); # Extract population name from the sample name
 			# If there are two populations, write the sample and population names in a new line in the output file...
-			if (length(@ARGV) == 2) {
+			if (scalar(@ARGV) == 4) {
 				if ($sn[0] eq $ARGV[2]) { # if the sample belongs to population 1
 					print OUT "$col[$i]\t$ARGV[2]\n"; 
 				}
@@ -34,7 +34,7 @@ while ($c==0) {
 				}
 			}
 			# If there are three populations, write the sample and population names in a new line in the output file...
-			if (length(@ARGV) == 3) { 
+			if (scalar(@ARGV) == 5) { 
 				if ($sn[0] eq $ARGV[2]) { # if the sample belongs to population 1
 					print OUT "$col[$i]\t$ARGV[2]\n"; 
 				}
