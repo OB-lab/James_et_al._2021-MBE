@@ -13,15 +13,15 @@ The SFS is a summary of genome-wide data describing the distribution of allele f
 
 A SFS is refered as *folded* when the information about the ancestral/derived state of the SNP is unavailable. Instead, the minor allele frequency is used as criteria for assigning an ancentral/derived-like state. A SFS is refered as *joint* when it summarises information from two or more populations. 
 
-Since the SFS strictly only consider SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data should be downsampled to the number of chromosomes that maximises the number of SNPs without missing data. This heavily relies on the quality of the sequence (coverage). In this regard, sequencing depth outweights sample size in importance.
+Since the SFS strictly only consider SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data should be downsampled to the number of chromosomes that maximises the number of SNPs without missing data. This heavily relies on the quality of the sequence. In this regard, sequencing depth outweights sample size in importance.
 
-[```easySFS```](https://github.com/isaacovercast/easySFS) is a Python script that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file could be directly generated from the VCF file using the custum Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
+```easySFS``` is a Python script that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file could be directly generated from the VCF file using the custum Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
 
 ```
 perl getpopmap.pl input.vcf popmap.txt NamePop1 NamePop2 NamePop3
 ```
 
-Before running ```easySFS```, the number of chromosomes or haploid samples (herein projections) should be picked it up. For this, the program should be run in preview mode: 
+Before running ```easySFS```, the number of chromosomes or haploid samples, herein projections, should be picked it up. For this, the program should be run in preview mode: 
 
 ```
 easySFS.py -i input.vcf -p popmap.txt --preview -a
@@ -40,10 +40,10 @@ Pop2
 In this example, projections ```7``` and ```6``` maximise the number of kept SNPs in population 1 and 2, respectively. These numbers should be specified with the ```--proj``` flag in the next step. ```-a``` flag means all the SNPs are considered, otherwise, a single SNP would be randomly sampled per RAD locus. ```-o``` flag specifies the output directory.
 
 ```
-easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_folder -a
+easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_directory -a
 ```
 
-```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming of the input files, it should only be used the SFS files contained in the fastsimcoal directory. Beware all files should be slightly renamed to be read by ```fastsimcoal```. The two numbers at the end of the name should be swapped. Hence, ```input_jointMAFpop0_1.obs``` should be renamed as ```input_jointMAFpop1_0.obs``` .
+```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming of the input files, it should only be used the SFS files contained in the fastsimcoal directory. Beware all files should be slightly renamed to be read by ```fastsimcoal```. The two numbers at the end of the name should be swapped. Hence, ```input_jointMAFpop0_1.obs``` should be renamed as ```input_jointMAFpop1_0.obs```.
 
 ### Getting the template file
 
@@ -51,7 +51,7 @@ The template file specifies the evolutionary model and the parameters that shoul
 
   + Number of populations.
   
-  + Populations effective size: It should contain one line per population, as mentioned in the previous section. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e.* NPOP1, NPOP2). Sizes correspond to the number of genes present in a population, it means twice the number of individuals for a diploid species. The order of the populations all along this file should be the same of the SFS file, which usually is alphabetically sorted. The program indexes the first population as 0, the second one as 1, and so on.
+  + Populations effective size: It should contain one line per population, as mentioned in the previous section. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e.* NPOP1, NPOP2). Sizes correspond to the number of genes present in a population, it means twice the number of individuals for a diploid species. The order of the populations all along this file should be the same of the populations in the SFS file, which usually is alphabetically sorted based on the population names. The program indexes the first population as 0, the second one as 1, and so on.
   
   + Samples size: It should contain one line per population, as mentioned in the first section, and follow the populations order specified in the previous section. Sizes should be given in haploid numbers. It corresponds to the number of projections set up in ```easySFS``` when generating the SFS file.
   
@@ -83,7 +83,9 @@ The template file specifies the evolutionary model and the parameters that shoul
   
   + Genetic properties: Data type, number of markers, recombination rate, and mutation rate. FREQ in the data type field specifies to estimate the SFS with the simulations.
   
-Every section is introduced by a comment line starting with the characters ```//```. This is how a template file for a population pair looks like:
+Every section starts with a comment line starting with the characters ```//```. The name of the template file must be the root name of the SFS file. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.tpl```.
+
+This is how a template file for a population pair looks like:
 
 ```
 // Two populations - D00_H00 - M5 Bidirectional secondary contact
