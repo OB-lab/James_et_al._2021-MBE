@@ -77,9 +77,9 @@ The template file specifies the evolutionary model and the parameters that shoul
   
   + Genetic properties: Data type, number of markers, recombination rate, and mutation rate. FREQ in the data type field specifies to estimate the SFS with the simulations.
   
-Every section starts with a comment line starting with the characters ```//```. The name of the template file must be the root name of the SFS file. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.tpl```.
+Every section starts with a comment line starting with the characters ```//```. The name of the template file must be the root name of the SFS file plus the extention ```.tpl```. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.tpl```.
 
-For the Dune-Headland population pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the D00-H00 pair are in the directory ```TemplateFiles```. Beware file names were modified to distinguish among models here. They assume Dune population comes first in the SFS file.
+For the Dune-Headland population pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the D00-H00 pair are in the directory ```TemplateFiles/Pair```. Beware file names were modified to distinguish among models here. They assume Dune population comes first in the SFS file.
 
   + Model 1: No migration.
   + Model 2: Bidirectional migration.
@@ -137,7 +137,7 @@ For the population triads, we considered a nested-models approach because the nu
   + Model 8: Bidirectional migration among all populations.
   + Model 9: Bidirectional migration between the A-B ancestor and C.
 
-Beware that, contrary to the population pairs case where the template files of the same model are quite the same among pairs because **1)** the Dune population always comes first in the SFS file and the Headland population comes second and **2)** the phylogenetic relationships among populations are the same regardless their orden, the template files of the same model vary from one triad to another and they should be carefully inspected case by case. Sample template files for the D32-H12-H12A triad are in the directory ```TemplateFiles```. Beware file names were modified to distinguish among models here.
+Beware that, contrary to the population pairs case where the template files of the same model are quite the same among pairs because **1)** the Dune population always comes first in the SFS file and the Headland population comes second and **2)** the phylogenetic relationships among populations are the same regardless their orden, the template files of the same model vary from one triad to another and they should be carefully inspected case by case. Sample template files for the D32-H12-H12A triad are in the directory ```TemplateFiles/Triad```. Beware file names were modified to distinguish among models here.
 
 This is how a template file for a population triad looks like:
 
@@ -180,8 +180,81 @@ FREQ 1 0 1e-8
 
 ### Getting the estimation file
 
+The estimation file specifies the search range of the parameters defined in the template file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided in three fixed sections in the following order:
+  
+  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either recorded or hidden in the output files. Some parameters, such as ```ANCSIZE```, are specified in this section despite they were not invoked in the template file. This is because they are later used to calculate other complex parameters that indeed were specified in the template file, such us ```RESIZE``` (see below).
+  
+  + Rules: It includes a set of conditions to be met among the above simple parameters. For instance, in a secondary contact model, it should be specified that the secondary contact event happened after the divergence of the involved populations. 
+  
+  + Complex parameters: It defines parameters that are obtained as simple operations between other parameters. For instance, the migration rate ```MIG12``` is calculated as the number of migrants ```NM12``` divided by the population size of the sink population ```NPOP2```.
+  
+The name of the template file must be the root name of the SFS file plus the extention ```.est```. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.est```.
 
+This is how a template file for a population pair looks like:
 
+```
+// Priors and rules file
+// *********************
+
+[PARAMETERS]
+//#isInt? #name   #dist.#min  #max
+//all N are in number of haploid individuals
+1  ANCSIZE     unif     100  100000   output
+1  NPOP1       unif     100  100000   output
+1  NPOP2       unif     100  100000   output
+0  NM12       logunif  1e-2 20       hide
+0  NM21       logunif  1e-2 20       hide
+1  TDIV        unif     100   20000   output
+1  TSEC        unif     100   20000   output
+
+[RULES]
+TDIV > TSEC
+
+[COMPLEX PARAMETERS]
+
+0  RESIZE = ANCSIZE/NPOP2     hide
+0  MIG12  = NM12/NPOP2       output
+0  MIG21  = NM21/NPOP1       output
+```
+
+And this is how a template file for a population triad looks like:
+
+```
+// Priors and rules file
+// *********************
+
+[PARAMETERS]
+//#isInt? #name   #dist.#min  #max
+//all N are in number of haploid individuals
+1  ANCSIZE     unif     100  100000   output
+1  HSIZE     unif     100  100000   output
+1  D32       unif     100  100000   output
+1  H12       unif     100  100000   output
+1  HA12       unif     100  100000   output
+1  TDIV1        unif     100   20000   output
+1  TDIV2        unif     100   20000   output
+0  NM12       logunif  1e-2 20       hide
+0  NM21       logunif  1e-2 20       hide
+0  NM13       logunif  1e-2 20       hide
+0  NM31       logunif  1e-2 20       hide
+0  NM23       logunif  1e-2 20       hide
+0  NM32       logunif  1e-2 20       hide
+
+[RULES]
+
+TDIV1 < TDIV2
+
+[COMPLEX PARAMETERS]
+
+0  RESIZE1 = HSIZE/D32     hide
+0  RESIZE2 = ANCSIZE/HSIZE     hide
+0  MIG12  = NM12/H12       output
+0  MIG21  = NM21/D32       output
+0  MIG13  = NM13/HA12       output
+0  MIG31  = NM31/D32       output
+0  MIG23  = NM23/HA12       output
+0  MIG32  = NM32/H12       output
+```
 
 ### Running fsc
 
