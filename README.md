@@ -21,6 +21,9 @@ Since the SFS strictly only consider SNPs without missing data, most of the SNPs
 perl getpopmap.pl input.vcf popmap.txt NamePop1 NamePop2 NamePop3
 ```
 
+The first argument is the name of the input VCF file, the second argument is the name of the output popmap file, and the following two or three arguments are the names of the populations. Beware the names of the samples should stat with the population name followed by a hyphen.
+
+
 Before running ```easySFS```, the number of chromosomes or haploid samples, herein projections, should be picked it up. For this, the program should be run in preview mode: 
 
 ```
@@ -258,12 +261,32 @@ TDIV1 < TDIV2
 
 ### Running fsc
 
+Running ```fastsimcoal``` is easy if the three input files are well formatted. All the files should be in the same folder from where the command is invoked. 
 
+```
+fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
+```
+
+The ```-t``` and  ```-e``` flags specify the template and estimation files, respectively, ```-n``` flag specifies the number of SFS simulations to fit to the data, ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, ```-L``` flag specifies the number of optimisation cycles, ```-c``` specifies the number of threads to be used for simulations, and ```-q``` flag keeps output messages at the minimum level.
+
+Reaching realible results depends at some extend on how well the parameters space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the best maximum likelihood value should be picked up. The custum Perl script ```mkdir_in.pl``` helps to create the required directories and copy the input files into them for launching the independent runs.
+
+```
+perl mkdir_in.pl 7 75
+```
+
+The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launch per model. Running this is best done in parallel in a server. The custum shell executable script ```runPOP1_POP2.sh``` just launch the jobs this way.
+
+```
+qsub runPOP1_POP2.sh
+```
+
+Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named 1, 2, 3, and so on up to the number of different models. Each directory should contain the three input files for running ```fastsimcoal```.
 
 
 ### Summarising the results
 
-
+Output files are...
 
 
 ### Selecting the best demographic model
