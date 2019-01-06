@@ -64,17 +64,11 @@ The template file specifies the evolutionary model and the parameters that shoul
   + Historical events. This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottle neck, admixture event, coalescence of population, etc. Every historical event should be specified in a different line. Each historical event is defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e.* TDIV, RESIZE).
     
     - Number of generations in the past at which the historical event happened.
-    
     - Source population.
-    
     - Sink population.
-    
     - Proportion of migrants moving from source to sink population. It should be 1 if both populations coalesce at this event.
-    
     - New size for the sink population backward in time.
-    
     - New growth rate for the sink population backward in time.
-    
     - New migration matrix index to be used further back in time.
   
   + Number of independent loci: The number of independent chromosomes to be simulated and a flag indicating if the different chromosomes have a different (1) or a similar (0) structure. 
@@ -84,6 +78,16 @@ The template file specifies the evolutionary model and the parameters that shoul
   + Genetic properties: Data type, number of markers, recombination rate, and mutation rate. FREQ in the data type field specifies to estimate the SFS with the simulations.
   
 Every section starts with a comment line starting with the characters ```//```. The name of the template file must be the root name of the SFS file. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.tpl```.
+
+For the Dune-Headland population pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the D00-H00 pair are in the directory ```TemplateFiles```. Beware file names were modified to distinguish among models here. They assume Dune population comes first in the SFS file.
+
+  + Model 1: No migration.
+  + Model 2: Bidirectional migration.
+  + Model 3: Dune to Headland migration.
+  + Model 4: Headland to Dune migration.
+  + Model 5: Bidirectional migration after secondary contact.
+  + Model 6: Dune to Headland migration after secondary contact.
+  + Model 7: Headland to Dune migration after secondary contact.
 
 This is how a template file for a population pair looks like:
 
@@ -117,9 +121,25 @@ TSEC 0 1 0 1 0 1
 1
 //per Block:data type, number of loci, per gen recomb and mut rates
 FREQ 1 0 1e-8
-
 ```
-And this is how a template file for a population triad looks like:
+
+```NPOP1```, ```NPOP2```, ```MIG21```, ```MIG12```, ```TDIV```, ```RESIZE```, and ```TSEC``` are the unknown parameters to be estimated by ```fastsimcoal```. They all should be as well specified in the corresponding estimation file.
+
+For the population triads, we considered a nested-models approach because the number of possible demographic models considerably increases with more than two populations. Nine initial models, ranging from no migration to bidirectional migration among all populations, are first fitted to data and then different nested variants of the best model are explored, such as unidirectional migration or migration after secondary contact.
+
+  + Model 1: No migration. 
+  + Model 2: Bidirectional migration between A and B.
+  + Model 3: Bidirectional migration between A and C.
+  + Model 4: Bidirectional migration between B and C.
+  + Model 5: Bidirectional migration between A and B AND A and C.
+  + Model 6: Bidirectional migration between A and B AND B and C.
+  + Model 7: Bidirectional migration between A and C AND B and C.
+  + Model 8: Bidirectional migration among all populations.
+  + Model 9: Bidirectional migration between the A-B ancestor and C.
+
+Beware that, contrary to the population pairs case where the template files of the same model are quite the same among pairs because **1)** the Dune population always comes first in the SFS file and the Headland population comes second and **2)** the phylogenetic relationships among populations are the same regardless their orden, the template files of the same model vary from one triad to another and they should be carefully inspected case by case. Sample template files for the D32-H12-H12A triad are in the directory ```TemplateFiles```. Beware file names were modified to distinguish among models here.
+
+This is how a template file for a population triad looks like:
 
 ```
 // Three populations: D32_H12_H12A - M8 Bidirectional migration all combinations
@@ -158,8 +178,7 @@ TDIV2 1 0 1 RESIZE2 0 1
 FREQ 1 0 1e-8
 ```
 
-
-### Getting the parameter file
+### Getting the estimation file
 
 
 
