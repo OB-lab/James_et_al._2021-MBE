@@ -1,6 +1,6 @@
 // Two populations - D00_H00 - M2 Bidirectional migration
 2
-//Population effective sizes: to be estimated.
+//Population effective sizes: to be estimated
 NPOP1
 NPOP2
 //Samples haploid size: the same one defined in the projections
