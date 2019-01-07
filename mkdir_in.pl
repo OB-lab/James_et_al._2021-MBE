@@ -9,8 +9,8 @@
 use warnings;
 use strict;
 
-my $dir = 1;
 # Create a folder containing the input files for every independent run per model.
+my $dir = 1;
 while ($dir <= $ARGV[0]) {
 	chdir($dir);
 	my $r = 1;
