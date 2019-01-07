@@ -285,7 +285,13 @@ Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the loca
 
 ### Summarising the results
 
-Output files are...
+```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e.* POP1_POP2), that contains most of the relevant output files. ```POP1_POP2.bestlhoods``` is particularly useful for summarising the estimated parameter values and ```POP1_POP2.brent_lhoods``` for evaluating the run performance. The custum Perl script ```extract_ml.pl``` reads the ```POP1_POP2.bestlhoods``` across all the runs per model and summarises their maximum likelihood value in a table. It also copies both of the above mentioned files of the best run per model in a new directory, named ```results_POP1_POP2```. 
+
+```
+perl extract_ml.pl 7 75 D00_H00
+```
+
+```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. The custum R script ```...R``` plots... Inspecting these plots we can offer a quick idea about the performance of the parameter space exploration...
 
 
 ### Selecting the best demographic model
