@@ -1,21 +1,20 @@
-# mkdir_in.pl
-# 12/09/2018
-# henry.arenasc@gmail.com
-# Create N folder files for equal number of independent runs for a given X number of models
-# Use: perl mkdir_in.pl (0) number of models (1) number of independent runs per model
+# mkdir_in.pl creates directories containing the required input files for launching independent runs per model
 
-# The *.obs, *.est, and *.tpl files should be in every model's folder named from from 1 to $ARGV[0]
+# Use: perl mkdir_in.pl (0)number_of_models (1)number_of_independent_runs_per_model
+
+# Assumptions: 
+# - The location from where the script is invoked should contain as many directories as models and they should be named as consecutive numbers from 1 to the max number of models. 
+# - Each model directory should contain the corresponding SFS (*.obs), estimation (*.est), and template (*.tpl) files.
 
 use warnings;
 use strict;
 
 my $dir = 1;
 # Create a folder containing the input files for every independent run per model.
-# Model folders should be named from 1 to n.
 while ($dir <= $ARGV[0]) {
 	chdir($dir);
 	my $r = 1;
-	# Create the specified number of folder (independent runs) per model and move the input data into them.
+	# Create the specified number of folder (independent runs) per model and copy the input files into them.
 	while ($r <= $ARGV[1]){
 		system "mkdir run$r";
 		system "cp *.est *.tpl *.obs run$r";
