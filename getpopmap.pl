@@ -1,5 +1,4 @@
-# getpopmap.pl generates a tab-delimited population specification file from a CVF file 
-# containing either two or three populations
+# getpopmap.pl generates a tab-delimited population specification file from a CVF file containing either two or three populations
 
 # Use: perl getpopmap.pl (0)input_vcf_file (1)output_popmap_file (2)name_pop1 (3)name_pop2 (4)name_pop3
 
