@@ -21,7 +21,7 @@ Since the SFS strictly only consider SNPs without missing data, most of the SNPs
 perl getpopmap.pl input.vcf popmap.txt NamePop1 NamePop2 NamePop3
 ```
 
-The first argument is the name of the input VCF file, the second argument is the name of the output popmap file, and the following two or three arguments are the names of the populations. Beware the names of the samples should stat with the population name followed by a hyphen.
+The first argument is the name of the input VCF file, the second argument is the name of the output popmap file, and the following two or three arguments are the names of the populations. Beware the names of the samples in the VCF file should stat with the population name followed by a hyphen.
 
 
 Before running ```easySFS```, the number of chromosomes or haploid samples, herein projections, should be picked it up. For this, the program should be run in preview mode: 
@@ -40,13 +40,13 @@ Pop2
 (2, 68.0)   (3, 96.0)   (4, 106.0)  (5, 110.0)  (6, 118.0)  (7, 109.0)   (8, 106.0)   (9, 96.0)   (10, 86.0)
 ```
 
-In this example, projections ```7``` and ```6``` maximise the number of kept SNPs in population 1 and 2, respectively. These numbers should be specified with the ```--proj``` flag in the next step. ```-a``` flag means all the SNPs are considered, otherwise, a single SNP would be randomly sampled per RAD locus. ```-o``` flag specifies the output directory.
+In this example, projections ```7``` and ```6``` maximise the number of kept SNPs in population 1 and 2, respectively. These numbers should be specified with the ```--proj``` flag in the next step. The ```-a``` flag means all the SNPs are considered, otherwise, a single SNP would be randomly sampled per RAD locus. The ```-o``` flag specifies the output directory.
 
 ```
 easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_directory -a
 ```
 
-```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming of the input files, it should only be used the SFS files contained in the fastsimcoal directory. Beware all files should be slightly renamed to be read by ```fastsimcoal```. The two numbers at the end of the name should be swapped. Hence, ```input_jointMAFpop0_1.obs``` should be renamed as ```input_jointMAFpop1_0.obs```.
+```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming pattern of the input files, it should only be used the SFS files contained in the fastsimcoal directory. Beware all files should be slightly renamed to be read by ```fastsimcoal```. The two numbers at the end of the name should be swapped. Hence, ```input_jointMAFpop0_1.obs``` should be renamed as ```input_jointMAFpop1_0.obs```.
 
 ### Getting the template file
 
@@ -64,7 +64,7 @@ The template file specifies the evolutionary model and the parameters that shoul
   
   + Migration matrix: It should contain one matrix per migration matrix, as mentioned in the previous section. The program indexes the first migration matrix as 0, the second one as 1, and so on. Columns/rows keep the logic from/to. If the migration rate is unknown, a parameter name should be specified instead in the corresponding cell to be calculated (*i.e.* MIG12, MIG21).
   
-  + Historical events. This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottle neck, admixture event, coalescence of population, etc. Every historical event should be specified in a different line. Each historical event is defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e.* TDIV, RESIZE).
+  + Historical events. This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottle neck, admixture event, coalescence of population, etc. Each historical event should be specified in a different line. Each historical event is defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e.* TDIV, RESIZE).
     
     - Number of generations in the past at which the historical event happened.
     - Source population.
@@ -185,13 +185,13 @@ FREQ 1 0 1e-8
 
 The estimation file specifies the search range of the parameters defined in the template file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided in three fixed sections in the following order:
   
-  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either recorded or hidden in the output files. Some parameters, such as ```ANCSIZE```, are specified in this section despite they were not invoked in the template file. This is because they are later used to calculate other complex parameters that indeed were specified in the template file, such us ```RESIZE``` (see below).
+  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either recorded or omitted in the output files. Some parameters, such as ```ANCSIZE```, are specified in this section despite they were not invoked in the template file. This is because they are later used to calculate other complex parameters that indeed were specified in the template file, such us ```RESIZE``` (see below).
   
   + Rules: It includes a set of conditions to be met among the above simple parameters. For instance, in a secondary contact model, it should be specified that the secondary contact event happened after the divergence of the involved populations. 
   
   + Complex parameters: It defines parameters that are obtained as simple operations between other parameters. For instance, the migration rate ```MIG12``` is calculated as the number of migrants ```NM12``` divided by the population size of the sink population ```NPOP2```.
   
-The name of the template file must be the root name of the SFS file plus the extention ```.est```. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.est```.
+The name of the template file must be the root name of the SFS file plus the extention ```.est```. For instance, the corresponding template file name of ```D00_H00_jointMAFpop1_0.obs``` should be ```D00_H00.est```. Sample estimation files for the D00_H00 pair are in the directory ```EstimationFiles/Pair``` and for the D32-H12-H12A triad are in the directory ```EstimationFiles/Triad```.
 
 This is how a template file for a population pair looks like:
 
@@ -267,9 +267,9 @@ Running ```fastsimcoal``` is easy if the three input files are well formatted. A
 fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
 ```
 
-The ```-t``` and  ```-e``` flags specify the template and estimation files, respectively, ```-n``` flag specifies the number of SFS simulations to fit to the data, ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, ```-L``` flag specifies the number of optimisation cycles, ```-c``` specifies the number of threads to be used for simulations, and ```-q``` flag keeps output messages at the minimum level.
+The ```-t``` and  ```-e``` flags specify the template and estimation files, respectively, the ```-n``` flag specifies the number of SFS simulations to fit to the data, the ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, the ```-L``` flag specifies the number of optimisation cycles, the ```-c``` specifies the number of threads to be used for simulations, and the ```-q``` flag keeps output messages at the minimum level.
 
-Reaching realible results depends at some extend on how well the parameters space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the best maximum likelihood value should be picked up. The custum Perl script ```mkdir_in.pl``` helps to create the required directories and copy the input files into them for launching the independent runs.
+Reaching realible results depends at some extend on how well the parameters space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the best maximum likelihood value should be picked up for further analysis. The custum Perl script ```mkdir_in.pl``` helps to create the required directories and copy the input files into them for launching the independent runs.
 
 ```
 perl mkdir_in.pl 7 75
@@ -281,8 +281,7 @@ The first argument corresponds to the number of models to test and the second ar
 qsub runPOP1_POP2.sh
 ```
 
-Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named 1, 2, 3, and so on up to the number of different models. Each directory should contain the three input files for running ```fastsimcoal```.
-
+Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each directory should contain the three input files for running ```fastsimcoal```.
 
 ### Summarising the results
 
