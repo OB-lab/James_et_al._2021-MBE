@@ -1,11 +1,14 @@
 # Past Demography
 
-## Infering the demographic history of *Senecio lautus* populations
+This repository contains step-by-step instructions and code for infering demographic parameters of population pairs and triads of *Senecio lautus* using ```fastsimcoal``` and ```TreeMix```.
 
-This repository contains step-by-step instructions and code for infering demographic parameters of population pairs and triads of *Senecio lautus* using ```fastsimcoal```.
+## Infering the demographic history of *Senecio lautus* populations using fastsimcoal
 
-```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. For working, it requires three input files: **1)** a site frequency spectrum file, **2)** a template file, and **3)** an estimation file.
+```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. 
 
+... MENTION THE APPROACH BASED ON PAIRS AND TRIADS BECAUSE THE A PRIORI MODELS APPROACH...
+
+For working, ```fastsimcoal``` requires three input files: **1)** a site frequency spectrum file, **2)** a template file, and **3)** an estimation file.
 
 ### Getting the site frequency spectrum (SFS) file
 
@@ -304,7 +307,9 @@ The custum R script ```...R``` plots... Inspecting these plots we can offer a qu
 ### Estimating the confidence intervals
 
 
+## Infering the demographic history of *Senecio lautus* populations using TreeMix
 
 
-### References
+
+## References
 fastsimcoal web site...
