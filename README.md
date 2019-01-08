@@ -4,9 +4,7 @@ This repository contains step-by-step instructions and code for infering demogra
 
 ## Infering the demographic history of *Senecio lautus* populations using fastsimcoal
 
-```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. 
-
-... MENTION THE APPROACH BASED ON PAIRS AND TRIADS BECAUSE THE A PRIORI MODELS APPROACH...
+```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
 
 For working, ```fastsimcoal``` requires three input files: **1)** a site frequency spectrum file, **2)** a template file, and **3)** an estimation file.
 
