@@ -296,7 +296,7 @@ perl extract_ml.pl 7 75 D00_H00
 
 The first argument corresponds to the number of models, the second argument corresponds to the number of independent runs per model, and the third argument corresponds to the root name of the files. ```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. 
 
-The custum R script ```...R``` plots... Inspecting these plots we can offer a quick idea about the performance of the parameter space exploration...
+The custum R script ```summaryplots_fsc.R``` graphically summarises the performance of fastsimcoal runs across the different models and populations. It generates a PDF file showing, in the first section, boxplots of the maximum likelihood values of all runs per model per population pair and triad and, in the second section, scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad. By inspecting these plots, we can get a quick idea about the overall performance of the parameter space exploration.
 
 
 ### Selecting the best demographic model
