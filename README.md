@@ -297,12 +297,14 @@ The first argument corresponds to the number of models, the second argument corr
 The custum R script ```summaryplots_fsc.R``` graphically summarises the performance of fastsimcoal runs across the different models and populations. It generates a PDF file showing, in the first section, boxplots of the maximum likelihood values of all runs per model per population pair and triad and, in the second section, scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad. By inspecting these plots, we can get a quick idea about the overall performance of the parameter space exploration.
 
 
-### Selecting the best demographic model
+### Selecting the best demographic models
 
-
+AIC weights calculation... Interpretation...
 
 
 ### Estimating the confidence intervals
+
+Parametric bootstrap...
 
 
 ## Infering the demographic history of *Senecio lautus* populations using TreeMix
