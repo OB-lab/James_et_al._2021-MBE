@@ -353,20 +353,19 @@ The custum R script ```summaryplots_fsc.R``` graphically summarises the performa
 
 ### Selecting the best demographic models
 
-Information theory offers an objective way to calculate the probability of multiple demographic models and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach, namely Akaike weight, is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. For a given model i, its Akaikw weight **w <sub>i</sub>** is **exp(−Δ <sub>i</sub> /2) / ∑ from r=1 to R of exp(−Δ <sub>r</sub> /2)**.
+Information theory offers an objective way to calculate the probability of multiple demographic models and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach, namely Akaike weight, is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. 
+
+For a given model i, its Akaike weight **w <sub>i</sub>** is equal to **exp(−Δ <sub>i</sub> /2) / ∑ from r=1 to R of exp(−Δ <sub>r</sub> /2)**.
 
 
-```Δ``` being the difference between the AIC value of a particular model and the best model of the set. 
+```Δ``` being the difference between the AIC value of a particular model and the AIC value of the best model of the set and **R** being the total number of models in the set.  The Akaike weight values of all the models should sum up 1.0. It is read as the weight of evidence in favor of the model assuming that the actual best model is present in the set of models.
 
-The custum Perl script ```extract_ml.pl```  
-
-
-AIC weights calculation... Interpretation ...
-
-Threshold of 0.01 and selection case-by-case of the model with >0.50 support...
+The file containing the AIC values (\*.bestlhood) of the best run per model were extracted in a new directory by running the custum Perl script ```extract_ml.pl``` as shown above. 
 
 
 ### Estimating the confidence intervals
+
+Threshold of 0.01 and selection case-by-case of the model with >0.50 support...
 
 Parametric bootstrap...
 
