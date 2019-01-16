@@ -360,32 +360,40 @@ For a given model i, its Akaike weight **w <sub>i</sub>** is equal to **exp(−�
 
 ```Δ``` being the difference between the AIC value of a particular model and the AIC value of the best model of the set and **R** being the total number of models in the set.  The Akaike weight values of all the models should sum up 1.0. It is read as the weight of evidence in favor of the model assuming that the actual best model is present in the set of models.
 
-The file containing the AIC values (\*.bestlhood) of the best run per model were extracted in a new directory by running the custum Perl script ```extract_ml.pl``` as shown above. 
+The files containing the AIC values (\*.bestlhood) of the best run per model were extracted in a new directory by running the custum Perl script ```extract_ml.pl``` as shown above. 
 
 
 ### Estimating the confidence intervals
 
 We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and its corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
-For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* input file. 
+For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* input file. This file can be generated editing the *maximum likelihood parameter* file (\_maxL.par) output by ```fastsimcoal```. The last three sections of this file usually looks like:
 
-
-Modify the *maxL.par file of the best run of the best model as below:
-
+```
 //Number of independent loci [chromosome] 
-200000 0
+1 0
+//Per chromosome: Number of contiguous linkage Block: a block is a set of contiguous loci
+1
+//per Block:data type, number of loci, per gen recomb and mut rates
+FREQ 1 0 1e-8
+```
+
+They should be slightly modified to specified that a DNA sequence, representing a given number (10,000) of independent loci of a particular lenght (e.g. 100 bp), should be simulated. It also should be renamed as \*.par. After this, the *parameter* file should look like:
+
+```
+//Number of independent loci [chromosome] 
+10000 0
 //Per chromosome: Number of contiguous linkage Block: a block is a set of contiguous loci
 1
 //per Block:data type, number of loci, per gen recomb and mut rates
 DNA 100 0 1e-8 OUTEXP
+```
 
-rename it as simply *.par
+The *maximum likelihood parameter* file of the best run, along the corresponding *parameter values*, template, and estimation files, are copied to a new directory using the custum Perl script ```runboot1.pl```.
 
-
-
-Run runboot1.pl that internally calls runboot.sh
-
-nohup perl ../../runboot1.pl D00_H00 100 &> runboot1_D00_H00.out &
+```
+perl runboot1.pl D00_H00 100
+```
 
 
 
