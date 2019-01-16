@@ -1,3 +1,57 @@
+# Bioinformatics
+
+## Quality filtering and trimming
+
+The Beijing Genomics Institute removed forward barcodes and quality filtered the raw reads to remove reads containing Illumina adaptors, low quality reads (>50% of bases <Q10), and reads with >10% Ns.
+
+## Read alignment
+
+We used ``` TagCleaner``` to remove reverse barcodes from each individual. tag5 is the reverse barcode sequence, in this example GTCA. mm5 is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). trim_within is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode). 
+
+```
+perl tagcleaner.pl -fastq ind1_2.fq -tag5 GTCA -mm5 1 -trim_within 5 -out ind1_trim_2 -log ind1_trim_2.log
+```
+
+The reference genome was indexed with ```bwa```.
+
+```
+bwa index -a is reference.fasta
+```
+
+For each individual, the bwa mem algorithm aligned reads to the reference. The _1 and _2 files correspond to the forward and reverse read files for each individual.
+
+```
+bwa mem -M reference.fasta ind1_1.fastq ind1_2.fastq >ind1.sam 2>log_file.log
+```
+
+The sam files were converted to bam files with ```SamTools```.
+
+```
+samtools view -bS ind1.sam > ind1.bam
+```
+
+```SamTools``` was used to produce a summary of alignment stats per individual.
+
+```
+samtools flagstat ind1.bam &> ind1_stats.txt
+```
+
+```PicardTools``` was used to clean bam files (to set soft-clipping for reads beyond end of the reference, and MAPQ to 0 for unmapped reads).
+
+```
+java -jar picard.jar CleanSam INPUT=ind1.bam OUTPUT=ind1.cleaned.bam 2>7.ind1.cleaned.bam.log
+```
+
+PicardTools was used to add read groups to each individual. RGID is the read group ID, set to the name of the individual. RGLB is the read group library, set to the sequencing lane number. RGPU is the read group platform unit (i.e., run barcode of the lane). RGSM is the read group sample name, set to the name of the individual
+
+```
+java -jar picard.jar AddOrReplaceReadGroups INPUT=ind1.cleaned.bam OUTPUT=ind1.sort.rg.bam SORT_ORDER=coordinate RGID=ind1 RGLB=lib1 RGPL=ILLUMINA RGPU= HC2TFBBXX:2 RGSM=ind1 CREATE_INDEX=True 2>ind1.sort.rg.log
+```
+
+## SNP calling
+
+
+
 # Past Demography
 
 This repository contains step-by-step instructions and code for infering demographic parameters of population pairs and triads of *Senecio lautus* using ```fastsimcoal``` and ```TreeMix```.
