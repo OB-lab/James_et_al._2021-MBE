@@ -299,12 +299,52 @@ The custum R script ```summaryplots_fsc.R``` graphically summarises the performa
 
 ### Selecting the best demographic models
 
+Information theory offers an objective way to calculate the probability of multiple demographic models given the data and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. For a given model ```i```, it support value ```Wi``` is:
+
+```
+Wi = exp(-Δi/2)/\sum_{r=1}^{R} exp(-Δi/2)
+```
+
+
+The custum Perl script ```extract_ml.pl```  
+
+
 AIC weights calculation... Interpretation...
+
+Threshold of 0.01 and selection case-by-case of the model with >0.50 support...
 
 
 ### Estimating the confidence intervals
 
 Parametric bootstrap...
+
+
+
+Modify the *maxL.par file of the best run of the best model as below:
+
+//Number of independent loci [chromosome] 
+200000 0
+//Per chromosome: Number of contiguous linkage Block: a block is a set of contiguous loci
+1
+//per Block:data type, number of loci, per gen recomb and mut rates
+DNA 100 0 1e-8 OUTEXP
+
+rename it as simply *.par
+
+
+
+Run runboot1.pl that internally calls runboot.sh
+
+nohup perl ../../runboot1.pl D00_H00 100 &> runboot1_D00_H00.out &
+
+
+
+CREATE THE BASH FILE AND LAUNCH IT
+qsub runboot_D00_H00.sh
+
+perl ../../runboot2.pl D00_H00 100
+
+Plot results in R
 
 
 ## Infering the demographic history of *Senecio lautus* populations using TreeMix
