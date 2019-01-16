@@ -299,17 +299,15 @@ The custum R script ```summaryplots_fsc.R``` graphically summarises the performa
 
 ### Selecting the best demographic models
 
-Information theory offers an objective way to calculate the probability of multiple demographic models given the data and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. For a given model ```i```, it support value ```Wi``` is:
+Information theory offers an objective way to calculate the probability of multiple demographic models and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. For a given model i, its support value **w <sub>i</sub>** is **exp(−Δ <sub>i</sub> /2) / ∑ from r=1 to R of exp(−Δ <sub>r</sub> /2)**.
 
-```
-Wi = exp(-Δi/2)/\sum_{r=1}^{R} exp(-Δi/2)
-```
 
+```Δ``` being the difference between the AIC value of a particular model and the best model of the set. 
 
 The custum Perl script ```extract_ml.pl```  
 
 
-AIC weights calculation... Interpretation...
+AIC weights calculation... Interpretation ...
 
 Threshold of 0.01 and selection case-by-case of the model with >0.50 support...
 
