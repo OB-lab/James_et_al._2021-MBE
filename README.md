@@ -336,7 +336,7 @@ The first argument corresponds to the number of models to test and the second ar
 qsub runPOP1_POP2.sh
 ```
 
-Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each directory should contain the three input files for running ```fastsimcoal```.
+The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each directory should contain the three input files for running ```fastsimcoal```. 
 
 ### Summarising the results
 
@@ -365,10 +365,9 @@ The file containing the AIC values (\*.bestlhood) of the best run per model were
 
 ### Estimating the confidence intervals
 
-Threshold of 0.01 and selection case-by-case of the model with >0.50 support...
+We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and its corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
-Parametric bootstrap...
-
+For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* input file. 
 
 
 Modify the *maxL.par file of the best run of the best model as below:
