@@ -112,13 +112,10 @@ We had three main sets of data that consisted of either all populations, or only
 
 ### Filtering for the *full-unlinked dataset*
 
-![Alt text](missing_data_all.png?raw=true "Title")
+![Alt text](missing_data_all.jpeg?raw=true "Title")
 
 
-![Alt text](missing_data.jpeg?raw=true "Title")
 
-
-![Alt text](Missing_data_all.pdf?raw=true "Title")
 
 
 
