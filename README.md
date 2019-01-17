@@ -1,3 +1,7 @@
+
+This repository contains step-by-step instructions and code for filtering the sequencing data and infering demographic parameters of population pairs and triads of *Senecio lautus* using ```fastsimcoal``` and ```TreeMix```.
+
+
 # Bioinformatics
 
 This repository outlines the bioinformatics pipeline undertaken for [paper-name]. 
@@ -116,20 +120,14 @@ We had three main sets of data that consisted of either all populations, or only
 
 
 
+# fastsimcoal
 
-
-
-# Past Demography
-
-This repository contains step-by-step instructions and code for infering demographic parameters of population pairs and triads of *Senecio lautus* using ```fastsimcoal``` and ```TreeMix```.
-
-## Infering the demographic history of *Senecio lautus* populations using fastsimcoal
 
 ```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
 
 For working, ```fastsimcoal``` requires three input files: **1)** a site frequency spectrum file, **2)** a template file, and **3)** an estimation file.
 
-### Getting the site frequency spectrum (SFS) file
+## Getting the site frequency spectrum (SFS) file
 
 The SFS is a summary of genome-wide data describing the distribution of allele frequencies in a sample of one or more populations. For instance, it tells how many SNPs are derived in only one chromosome, two chromosomes, three chromosomes, and so on. Its shape is influenced by the history of the population: migration, population size changes, substructure, etc. The SFS treats all SNPs in the data set as independent of one another. Sample size is counted in haploid numbers.
 
@@ -170,7 +168,7 @@ easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_directory -a
 
 ```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming pattern of the input files, it should only be used the SFS files contained in the fastsimcoal directory. Beware all files should be slightly renamed to be read by ```fastsimcoal```. The two numbers at the end of the name should be swapped. Hence, ```input_jointMAFpop0_1.obs``` should be renamed as ```input_jointMAFpop1_0.obs```.
 
-### Getting the template file
+## Getting the template file
 
 The template file specifies the evolutionary model and the parameters that should be estimated. It is divided in ten fixed sections in the following order:
 
@@ -303,7 +301,7 @@ TDIV2 1 0 1 RESIZE2 0 1
 FREQ 1 0 1e-8
 ```
 
-### Getting the estimation file
+## Getting the estimation file
 
 The estimation file specifies the search range of the parameters defined in the template file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided in three fixed sections in the following order:
   
@@ -381,7 +379,7 @@ TDIV1 < TDIV2
 0  MIG32  = NM32/H12       output
 ```
 
-### Running fsc
+## Running fsc
 
 Running ```fastsimcoal``` is easy if the three input files are well formatted. All the files should be in the same folder from where the command is invoked. 
 
@@ -405,7 +403,7 @@ qsub runPOP1_POP2.sh
 
 The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each directory should contain the three input files for running ```fastsimcoal```. 
 
-### Summarising the results
+## Summarising the results
 
 ```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e.* POP1_POP2), that contains most of the relevant output files. ```POP1_POP2.bestlhoods``` is particularly useful for summarising the estimated parameter values and ```POP1_POP2.brent_lhoods``` for evaluating the run performance. The custum Perl script ```extract_ml.pl``` reads the ```POP1_POP2.bestlhoods``` across all the runs per model and summarises their maximum likelihood value in a table. It also copies both of the above mentioned files of the best run per model in a new directory, named ```results_POP1_POP2```. 
 
@@ -418,7 +416,9 @@ The first argument corresponds to the number of models, the second argument corr
 The custum R script ```summaryplots_fsc.R``` graphically summarises the performance of fastsimcoal runs across the different models and populations. It generates a PDF file showing, in the first section, boxplots of the maximum likelihood values of all runs per model per population pair and triad and, in the second section, scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad. By inspecting these plots, we can get a quick idea about the overall performance of the parameter space exploration.
 
 
-### Selecting the best demographic models
+
+
+## Selecting the best demographic models
 
 Information theory offers an objective way to calculate the probability of multiple demographic models and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach, namely Akaike weight, is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. 
 
@@ -430,7 +430,7 @@ For a given model i, its Akaike weight **w <sub>i</sub>** is equal to **exp(âˆ’Î
 The files containing the AIC values (\*.bestlhood) of the best run per model were extracted in a new directory by running the custum Perl script ```extract_ml.pl``` as shown above. 
 
 
-### Estimating the confidence intervals
+## Estimating the confidence intervals
 
 We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and its corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
@@ -474,7 +474,7 @@ The custum Perl script ```runboot2.pl``` extracts the parameter values of all th
 perl runboot2.pl D00_H00 100
 ```
 
-The confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. 
+The 95% confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. 
 
 ```
 groupwiseMean(Vi ~ 1, 
@@ -486,8 +486,7 @@ groupwiseMean(Vi ~ 1,
 Where ```Vi``` corresponds to the column name of the parameter of interest (*i.e.* V1 for ancentral size) and ```Table``` corresponds to the matrix containing the parameter values of all the replicates. 
 
 
-
-## Infering the demographic history of *Senecio lautus* populations using TreeMix
+# TreeMix
 
 
 
