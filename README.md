@@ -106,6 +106,13 @@ bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf
 
 ## SNP filtering
 
+We closely followed the ```dDocent``` guidelines for SNP filtering: http://ddocent.com/filtering/. Some of the below is directly from the ```dDocent``` pipeline, so kudos to J. Puritz!
+
+We had three main sets of data that consisted of either all populations, or only the eastern and southern (ES) populations. These were the **1)** *full-unlinked dataset*, **2)** *ES-unlinked dataset* and **3)** *ES dataset*.
+
+### Filtering for the *full-unlinked dataset*
+
+
 
 
 # Past Demography
