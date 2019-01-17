@@ -112,6 +112,7 @@ We had three main sets of data that consisted of either all populations, or only
 
 ### Filtering for the *full-unlinked dataset*
 
+![Alt text](missing_data.pdf)
 
 
 
