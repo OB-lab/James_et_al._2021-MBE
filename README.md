@@ -108,16 +108,100 @@ All VCF files were merged into one joint file.
 bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf
 ```
 
-## SNP filtering
-
 We closely followed the ```dDocent``` guidelines for SNP filtering: http://ddocent.com/filtering/. Some of the below is directly from the ```dDocent``` pipeline, so kudos to J. Puritz!
 
 We had three main sets of data that consisted of either all populations, or only the eastern and southern (ES) populations. These were the **1)** *full-unlinked dataset*, **2)** *ES-unlinked dataset* and **3)** *ES dataset*.
 
 ### Filtering for the *full-unlinked dataset*
 
+The *full-unlinked dataset* contained all 23 populations and was used for the phylogeny and population structure analyses. 
+
+Using ```VCFtools```, we first kept variants genotyped in 50% of individuals that have a minimum quality score of 30, and a minor allele count of 1.
+
+```
+vcftools --gzvcf all_joint.vcf.gz --max-missing 0.5 --mac 1 --minQ 30 --recode --recode-INFO-all --stdout | gzip -c > all_joint.Q30mac1.vcf.gz
+```
+
+We applied a minimum depth per sample of 3 reads (genotypes with less than 3 reads are recoded as missing data).
+
+```
+vcftools --gzvcf all_joint.Q30mac1.vcf.gz --minDP 3 --recode --recode-INFO-all --stdout | gzip -c > all_joint.Q30mac1dp3.vcf.gz
+```
+
+To remove low-quality individuals (those with a lot of missing data), we first created a list of the proportion of missing data per individual. The following code creates an output file called *out.imiss*, with the fifth column containing the proportion of missing data. 
+
+```
+vcftools --gzvcf all_joint.Q30mac1dp3.vcf.gz --missing-indv
+```
+
+We graphed the distribution of missing data per individual in R.  
+
 ![Alt text](missing_data_all.jpeg?raw=true "Title")
 
+We removed the upper tail of the distribution, discarding all individuals with more than 40% missing data. This was achieved by first creating a list of individuals with >40% missing data. 
+
+```
+mawk '$5 > 0.4' out.imiss | cut -f1 > lowDP.indv
+```
+
+We then used this list in VCFtools to remove the low-quality individuals.
+
+```
+vcftools --gzvcf all_joint.Q30mac1dp3.vcf.gz --remove lowDP.indv --recode --recode-INFO-all --out all_joint.Q30mac1dp3ir
+```
+
+Sites with high coverage could be multi-copy regions of the genome, so we want to remove these potential paralogues. We first examined the distribution of mean read depth across all sites by calculating the mean depth per site and graphing the distribution in R. 
+
+```
+vcftools --vcf all_joint.Q30mac1dp3ir.recode.vcf --site-mean-depth --out mean_depth
+```
+
+PICTUREEEE
+
+In general, the mean read depth per locus should be approximately normally distributed. Within the literature, various approaches have been used to select the maximum mean read depth. For instance, Li (2014) suggests using the equation: d+3*sqrt(d), d=mean depth (which is a value of 63 for our dataset). However, this method has been suggested as too conservative for RADseq data. Others use the 90th quantile (which is 88 for our data), two times the mode (40 for our data, after rounding the mean depths to the nearest 10), or, others just eyeball the mean depth distribution and remove the upper tail (~120 for our data). After examining these multiple approaches, we chose a maximum mean depth of 100. 
+
+```
+vcftools --vcf  all_joint.Q30mac1dp3ir.recode.vcf --recode --recode-INFO-all --out all_joint.Q30mac1dp3irMaxDP100 --max-meanDP 100 
+```
+
+We then filtered for a minimum mean depth of 10. 
+
+```
+vcftools --vcf all_joint.Q30mac1dp3irMaxDP100.recode.vcf --min-meanDP 10 --recode --recode-INFO-all --out all_joint.Q30mac1dp3irMaxDP100MinDP10
+```
+
+To ensure that each SNP is sequenced in every population, we filtered for missing data per population. We created a file containing the individual name in the first column, and the population identifier in the second column: *all_inds_pops.txt*. For each population, the individual names were extracted into a separate file. 
+
+```
+mawk '$2 == "D00"' all_inds_pops.txt > D00_keep && mawk '$2 == "D01"' all_inds_pops_mac1.txt > D01_keep && mawk '$2 == "D02"' all_inds_pops_mac1.txt > D02_keep
+```
+
+For each population we used VCFtools to calculate the proportion missing data per variant site. The below lines create output files called *D00.lmiss*, *D01.lmiss* and *D02.lmiss*, the 6th column containing the proportion of missing data for each variant site. 
+
+```
+vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10.recode.vcf --keep D00_keep --missing-site --out D00
+vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10.recode.vcf --keep D01_keep --missing-site --out D01
+#vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10.recode.vcf --keep D02_keep --missing-site --out D02
+```
+
+From each population file, we combined all loci that had greater than 50% missing data into one file: *badloci0.5*.
+
+```
+cat D00.lmiss D01.lmiss D02.lmiss | mawk '!/CHR/' | mawk '$6 > 0.5' | cut -f1,2 >> badloci0.5
+```
+
+We used ```VCFtools``` to remove the loci in the *badloci0.5* file. 
+
+```
+vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10.recode.vcf --exclude-positions badloci0.5 --recode --recode-INFO-all --out all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50
+```
+
+We additionally filtered for an overall missing data, removing sites if they had greater than 20% missing data. 
+
+```
+vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50.recode.vcf --recode --recode-INFO-all --max-missing 0.8 --out all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80
+```
+.....
 
 
 # fastsimcoal
