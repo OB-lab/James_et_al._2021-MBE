@@ -1,5 +1,7 @@
 # Bioinformatics
 
+This repository outlines the bioinformatics pipeline undertaken for [paper-name]. 
+
 ## Quality filtering and trimming
 
 The Beijing Genomics Institute removed forward barcodes and quality filtered the raw reads to remove reads containing Illumina adaptors, low quality reads (>50% of bases <Q10), and reads with >10% Ns.
@@ -42,13 +44,67 @@ samtools flagstat ind1.bam &> ind1_stats.txt
 java -jar picard.jar CleanSam INPUT=ind1.bam OUTPUT=ind1.cleaned.bam 2>7.ind1.cleaned.bam.log
 ```
 
-PicardTools was used to add read groups to each individual. RGID is the read group ID, set to the name of the individual. RGLB is the read group library, set to the sequencing lane number. RGPU is the read group platform unit (i.e., run barcode of the lane). RGSM is the read group sample name, set to the name of the individual
+```PicardTools``` was used to add read groups to each individual. *RGID* is the read group ID, set to the name of the individual. *RGLB* is the read group library, set to the sequencing lane number. *RGPU* is the read group platform unit (i.e., run barcode of the lane). *RGSM* is the read group sample name, set to the name of the individual.
 
 ```
 java -jar picard.jar AddOrReplaceReadGroups INPUT=ind1.cleaned.bam OUTPUT=ind1.sort.rg.bam SORT_ORDER=coordinate RGID=ind1 RGLB=lib1 RGPL=ILLUMINA RGPU= HC2TFBBXX:2 RGSM=ind1 CREATE_INDEX=True 2>ind1.sort.rg.log
 ```
 
 ## SNP calling
+
+We used ```FreeBayes``` to jointly call SNPs per population. Joint calling uses information across all samples to call a SNP (which can be beneficial for samples with low coverage). It thus assumes all samples are genetically similar. It is typical to joint call on “cohorts” of genetically similar individuals (aka populations, species). SNPs from these cohorts are then combined into one file. 
+
+We jointly called SNPs separately for each of the 23 populations because **1)** our samples were collected within distinct populations that occupy discrete geographic ranges, and **2)** previous data shows individuals within a population cluster together (are quite genetically similar). 
+
+However, when jointly calling SNPs, you must be careful with how the variant caller outputs the data. Typically, variant-calling software only outputs variant sites. However, if SNPs are being called on separate populations, and then combined, you will be unable to distinguish between monomorphic sites, and those that are missing data. Therefore, it is important to output all variant and invariant sites when a study has multiple populations that are independently being jointly called. For instance, the ```--report-monomorphic``` flag within ```FreeBayes``` achieves this.
+
+Due to computational constraints, we excluded contigs with extremely high coverage (removal of a contig if any site was >1,000X for an individual). This was an arbitrary cut-off value. Even if we called SNPs within these high coverage regions, these sites would have been in the downstream filtering steps due to their high coverage.
+
+```
+./freebayes -f reference.fasta ind1.sort.rg.bam ind2.sort.rg.bam --use-best-n-alleles 4 --report-monomorphic --genotype-qualities  –targets high_coverage_regions.bed >pop1_joint_raw.vcf
+```
+
+## Normalisation and merging of SNP cohorts
+
+Because SNPs were jointly called per population (cohort), it is crucial to normalise these files before merging them together.
+
+The first step of the normalisation process was to split multiallelic sites into biallelic records for each jointly-called VCF file with ```BCFtools```. This was to ensure each that each VCF file was recording multiallelic sites in the same way (see next step).
+
+```
+bcftools norm input.vcf -m +any -o output.vcf
+```
+
+Each file was then normalised by re-joining biallelic sites into multiallelic records. This was to ensure that the multiallelic records were consistently recorded for each population.
+
+```
+bcftools norm input.vcf -m +any -o output.vcf
+```
+
+For each population, indels were left-aligned and normalised. This was to ensure complex regions (such as indels or short tandem repeats) were normalised the same way for each population. See: https://genome.sph.umich.edu/wiki/Variant_Normalization
+
+```
+bcftools norm input.vcf -f reference.fasta -o output.vcf
+```
+
+VCF output files from ```FreeBayes``` sometimes contain biallelic block substitutions. For instance, instead of having one SNP per line, blocks of multiple SNPs sometimes exist. As we have a separate VCF file per population, different biallelic blocks exist for each population. If these are merged without decomposing them, repeated SNPs will exist within the file (a variant may be present within a biallelic block, but also on a separate line). Therefore, we used *vt* to decompose biallelic block substitutions into separate SNPs for each population.
+
+```
+vt decompose_blocksub -p input.vcf -o output.vcf
+```
+
+Each VCF file was zipped and then indexed.
+
+```
+bgzip -c input.vcf > output.vcf.gz  ;  tabix -p vcf input.vcf.gz
+```
+
+All VCF files were merged into one joint file.
+
+```
+bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf
+```
+
+## SNP filtering
 
 
 
