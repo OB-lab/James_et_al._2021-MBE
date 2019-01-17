@@ -156,7 +156,7 @@ Sites with high coverage could be multi-copy regions of the genome, so we want t
 vcftools --vcf all_joint.Q30mac1dp3ir.recode.vcf --site-mean-depth --out mean_depth
 ```
 
-PICTUREEEE
+![Alt text]( mean_read_depth_all.jpeg?raw=true "Title")
 
 In general, the mean read depth per locus should be approximately normally distributed. Within the literature, various approaches have been used to select the maximum mean read depth. For instance, Li (2014) suggests using the equation: d+3*sqrt(d), d=mean depth (which is a value of 63 for our dataset). However, this method has been suggested as too conservative for RADseq data. Others use the 90th quantile (which is 88 for our data), two times the mode (40 for our data, after rounding the mean depths to the nearest 10), or, others just eyeball the mean depth distribution and remove the upper tail (~120 for our data). After examining these multiple approaches, we chose a maximum mean depth of 100. 
 
