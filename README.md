@@ -434,7 +434,7 @@ The files containing the AIC values (\*.bestlhood) of the best run per model wer
 
 We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and its corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
-For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* input file. This file can be generated editing the *maximum likelihood parameter* file (\_maxL.par) output by ```fastsimcoal```. The last three sections of this file usually looks like:
+For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* (\*.par) input file. This file can be generated editing the *maximum likelihood parameter* file (\_maxL.par) output by ```fastsimcoal```. The last three sections of this file usually looks like:
 
 ```
 //Number of independent loci [chromosome] 
@@ -456,20 +456,35 @@ They should be slightly modified to specified that a DNA sequence, representing 
 DNA 100 0 1e-8 OUTEXP
 ```
 
-The *maximum likelihood parameter* file of the best run, along the corresponding *parameter values*, template, and estimation files, are copied to a new directory using the custum Perl script ```runboot1.pl```.
+The custum Perl script ```runboot1.pl``` internally runs ```fastsimcoal``` to simulate the specified number of SFS files in independent directories and then copies the *estimation* and *template* files of the chosen model to the newly created directories. The *estimation*, *template*, and *parameter values* (\*.pv) files of the best run of the chosen model shoul be previouly copied to the working directory.
 
 ```
 perl runboot1.pl D00_H00 100
 ```
 
+The first argument corresponds to the root name of the population pair or triad and the second argument correspons to the number of replicates. It can take a couple of minutes to run. The custum Bash file ```runboot_POP1_POP2.sh``` recalculates the parameter values given the simulated SFS. 
 
-
-CREATE THE BASH FILE AND LAUNCH IT
+```
 qsub runboot_D00_H00.sh
+```
 
-perl ../../runboot2.pl D00_H00 100
+The custum Perl script ```runboot2.pl``` extracts the parameter values of all the replicate runs as a table into a new file.
 
-Plot results in R
+```
+perl runboot2.pl D00_H00 100
+```
+
+The confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. 
+
+```
+groupwiseMean(Vi ~ 1, 
+              data=Table, 
+              conf=0.95, 
+              digits=6)
+```
+
+Where ```Vi``` corresponds to the column name of the parameter of interest (*i.e.* V1 for ancentral size) and ```Table``` corresponds to the matrix containing the parameter values of all the replicates. 
+
 
 
 ## Infering the demographic history of *Senecio lautus* populations using TreeMix
@@ -477,5 +492,4 @@ Plot results in R
 
 
 ## References
-fastsimcoal web site...
-dafdf
+fastsimcoal web site and a couple of paper.
