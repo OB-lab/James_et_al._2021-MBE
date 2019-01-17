@@ -6,7 +6,7 @@ The Beijing Genomics Institute removed forward barcodes and quality filtered the
 
 ## Read alignment
 
-We used ``` TagCleaner``` to remove reverse barcodes from each individual. tag5 is the reverse barcode sequence, in this example GTCA. mm5 is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). trim_within is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode). 
+We used ``` TagCleaner``` to remove reverse barcodes from each individual. *tag5* is the reverse barcode sequence, in this example GTCA. *mm5* is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). *trim_within* is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode).  
 
 ```
 perl tagcleaner.pl -fastq ind1_2.fq -tag5 GTCA -mm5 1 -trim_within 5 -out ind1_trim_2 -log ind1_trim_2.log
