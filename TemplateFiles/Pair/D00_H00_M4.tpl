@@ -1,4 +1,4 @@
-// Two populations - D00_H00 - M4 Headland to Dune migration
+// Two populations - D00_H00 - M4 Dune to Headland migration
 2
 //Population effective sizes: to be estimated
 NPOP1
