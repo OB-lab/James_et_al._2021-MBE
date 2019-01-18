@@ -15,4 +15,4 @@
 [COMPLEX PARAMETERS]
 
 0  RESIZE = ANCSIZE/NPOP2     hide
-0  MIG12  = NM12/NPOP2       output
+0  MIG12  = NM12/NPOP1       output
