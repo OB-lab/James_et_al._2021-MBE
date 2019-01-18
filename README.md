@@ -378,6 +378,27 @@ To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to keep one 
 
 This is the *full-unlinked dataset*, used to construct the phylogeny, and for the population structure analysis across all populations. 
 
+# Phylogeny
+
+We used IQ-TREE to generate a maximum likelihood phylogeny with the *full-unlinked dataset* . We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py``` was then used to convert the fasta file to a counts file.  
+
+```
+FastaToCounts.py all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.fasta.gz all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts
+```
+This counts file summarises the allele frequencies for each population. We then used ```ModelFinder``` to determine the best-fit substitution model for the data. The D09 population from Western Australia was assigned as the outgroup. 
+
+
+```
+iqtree -s all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts -m MF -o D09 -pre ModelFinder
+```
+
+TVMe+FQ+P+N9+G4 was the best substitution model, and we increased the virtual population size (N) to maximum value of 19, as recommended by Schrempf et al. (2016). We then constructed the phylogeny. Branch support was performed using ```UFboot``` (10,000 replicates) and ```SH-aLRT``` (10,000 replicates).
+
+```
+iqtree -s all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts -m TVMe+FQ+P+N19+G4 -o D09 -bb 10000 -alrt 10000 -pre run1
+```
+
+To assess convergence, we undertook 10 separate runs of above IQ-TREE code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
 
 .....
 
