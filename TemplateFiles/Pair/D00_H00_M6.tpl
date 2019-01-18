@@ -13,7 +13,7 @@ NPOP2
 2
 //Migration matrix 0: to be estimated.
 0 0
-MIG12 0
+MIG21 0
 //Migration matrix 1
 0 0
 0 0
