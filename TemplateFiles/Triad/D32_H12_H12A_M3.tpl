@@ -16,8 +16,8 @@ HA12
 2
 //Migration matrix 0
 0 0 0
-0 0 MIG32
-0 MIG23 0
+0 0 MIG23
+0 MIG32 0
 //Migration matrix 1
 0 0 0
 0 0 0
