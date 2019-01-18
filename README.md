@@ -204,7 +204,7 @@ vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50.recode.vcf --recode
 
 We removed indels, by first converting variant calls to SNP and indel genotypes with *vcflib*.
 
-``
+```
 vcfallelicprimitives all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80.recode.vcf --keep-info --keep-geno > all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50d80prim.vcf
 ```
 
