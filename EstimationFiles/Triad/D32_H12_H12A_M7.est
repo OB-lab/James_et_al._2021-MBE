@@ -24,7 +24,7 @@ TDIV1 < TDIV2
 
 0  RESIZE1 = HSIZE/D32     hide
 0  RESIZE2 = ANCSIZE/HSIZE     hide
-0  MIG12  = NM12/H12       output
-0  MIG21  = NM21/D32       output
-0  MIG13  = NM13/HA12       output
-0  MIG31  = NM31/D32       output
+0  MIG12  = NM12/D32       output
+0  MIG21  = NM21/H12       output
+0  MIG13  = NM13/D32       output
+0  MIG31  = NM31/HA12       output
