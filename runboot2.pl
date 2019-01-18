@@ -1,4 +1,4 @@
-# runboot2.pl perform parametric bootstrap based on the results of the best run of the best demographic model
+# runboot2.pl extracts the recalculated parameter values from simulated SFS files for calculating the confidence intervals
 
 # Use: perl boot_fsc.pl (0)root_name (1)number_of_replicates
 
