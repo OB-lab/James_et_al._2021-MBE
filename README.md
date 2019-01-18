@@ -6,7 +6,7 @@ This repository contains step-by-step instructions and code for filtering the se
 
 ## Quality filtering and trimming
 
-We received de-multiplexed forward and reverse sequencing files for each individual from The Beijing Genomics Institute (BGI). The Beijing Genomics Institute also removed forward barcodes and quality filtered the raw reads to remove reads containing Illumina adaptors, low quality reads (>50% of bases <Q10), and reads with >10% Ns.
+We received de-multiplexed forward and reverse sequencing files for each individual from The Beijing Genomics Institute (BGI). BGI also removed forward barcodes and quality filtered the raw reads to remove reads containing Illumina adaptors, low quality reads (>50% of bases <Q10), and reads with >10% Ns.
 
 ## Read alignment
 
