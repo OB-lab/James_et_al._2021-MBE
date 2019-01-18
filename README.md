@@ -201,6 +201,184 @@ We additionally filtered for an overall missing data, removing sites if they had
 ```
 vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50.recode.vcf --recode --recode-INFO-all --max-missing 0.8 --out all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80
 ```
+
+We removed indels, by first converting variant calls to SNP and indel genotypes with *vcflib*.
+
+``
+vcfallelicprimitives all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80.recode.vcf --keep-info --keep-geno > all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50d80prim.vcf
+```
+
+Indels were then removed.
+
+```
+vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50d80prim.vcf --remove-indels --recode --recode-INFO-all --out all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80ind
+```
+		
+We filtered for Hardy Weinberg Equilibrium within each population using the ```dDocent``` *filter_hwe_by_pop.pl* custom script, found here: https://github.com/jpuritz/dDocent/raw/master/scripts/filter_hwe_by_pop.pl. 
+
+```
+./filter_hwe_by_pop.pl -v all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80ind.recode.vcf -p all_inds_pops.txt -o all_joint_FB.Q30mac1dp3irMaxDP100MinDP10mpp50md80indHWE
+```
+
+This file was renamed to: *all_rel_50pp_80md_HWE.vcf*
+
+We also explored variations of the above SNP filtering parameters, ranging from ‘relaxed’ to ‘intermediate’ to ‘stringent’ filtering. We plotted PCAs to examine whether the clustering of populations was robust to variations in the dataset. We also explored further filtering steps outlined in the ```dDocent``` SNP filtering pipeline (http://ddocent.com/filtering/). Populations consistently grouped into the same clusters, suggesting our data is robust to slight variations in SNP quality, and SNP numbers. Within our paper, we have used an ‘intermediate’ level of filtering.
+
+Despite the normalisation process before merging the per-population VCF files (outlined above), a few duplicate SNPs remined within the final VCF file. These were removed. First, the chromosome number and variant position were extracted from: *all_rel_50pp_80md_HWE.vcf *, with a colon separating them. 
+
+```
+bcftools query -f '%CHROM:%POS\n' all_rel_50pp_80md_HWE.vcf > all_rel_50pp_80md_HWE_stats.txt
+``` 
+
+The duplicate sites were identified. 
+
+```
+perl -ne 'print if $seen{$_}++' all_rel_50pp_80md_HWE_stats.txt > dups.txt
+```
+		
+```PLINK``` was used to set the variant ids from '.' to the chromosome and position (separated by a colon). We also processed VCF half-calls as missing data. Half-calls occur when one allele for an individual at a particular site was called with high confidence, but the other was not, leaving that site with only one allele. To be conservative, we treated the whole SNP as missing. 
+	
+```	
+./plink2 --vcf all_rel_50pp_80md_HWE.vcf --export vcf --out all_rel_50pp_80md_HWE_ids --vcf-half-call m --allow-extra-chr --set-all-var-ids @:#
+```
+	
+The duplicate SNPs were removed from the VCF file. 
+
+```
+./plink2 --vcf all_rel_50pp_80md_HWE_ids.vcf --allow-extra-chr --exclude dups.txt --export vcf --out all_rel_50pp_80md_HWE_ids_removed
+```
+
+We then re-filtered for overall missing data of 20%.
+	
+```	
+./plink --vcf all_rel_50pp_80md_HWE_ids_removed.vcf --geno 0.2 --export vcf --allow-extra-chr --out all_rel_50pp_80md_HWE_ids_removed_80md 
+```
+
+We filtered for an overall minor allele frequency of 0.05.
+
+```
+./plink --vcf all_rel_50pp_80md_HWE_ids_removed.vcf --maf 0.05 --export vcf --allow-extra-chr --out all_rel_50pp_80md_HWE_MAF0.05
+```
+
+####Removal of selected loci with PCAdapt
+
+PCAdapt uses principal components analysis (PCA) to detect loci under selection. Because outliers will typically have large differences in allele frequencies between populations, they will be related to population structure and discriminate populations within a PCA. PCAdapt identifies these SNPs based upon a user defined (K) number of PC axes.
+
+We followed the PCAdapt tutorial, found here: https://bcm-uga.github.io/pcadapt/articles/pcadapt.html. Refer to the tutorial for additional information. The following code was performed in R:
+
+Load the required libraries for running PCAdapt.
+
+```
+library(pcadapt)
+library(robustbase)
+library(qvalue)
+```
+
+Define the path to the input file
+
+```
+path_to_file <- "…/all_rel_50pp_80md_HWE_MAF0.05.vcf"
+```
+
+Read the VCF file into the PCAdapt format. This will also output the number of individuals and number of loci so you can check it has read the file correctly.
+
+```
+file <- read.pcadapt(path_to_file, type = "vcf")
+```
+
+Do a PCA, with K principal components.
+
+```
+x <- pcadapt(input = file, K = 40)
+```
+
+Perform a scree plot to visualise how much variance each principal component explains.
+
+```
+plot(x, option = "screeplot")
+```
+
+![Alt text]( scree_plot_all.jpeg?raw=true "Title")
+
+The scree plot corresponds to the eigenvalues in decreasing order. The eigenvalues that correspond to random variation lie on the straight line whereas the ones that correspond to population structure lie on the curve. It is recommended to choose a K value that corresponds to where the curve meets the line. In our case, this is K=23 (which also corresponds to the number of populations with our study).
+
+We can also use an alternative method to choose K, which involves graphing the data onto different PC axes. When there is a random scatter of points, the principal components thus do not provide any information about population structure. You should then choose K to equal the last PC that shows population structure.
+
+First, a list of the population names (corresponding to the order of individuals in the input file) is supplied so each population can be plotted as a different colour.
+
+```
+poplist.names <- c(rep("D00", 62), rep("D01", 60), rep("D02", 62), rep("D03", 61), rep("D04", 62), rep("D05", 62), rep("D09", 63), rep("D12", 62), rep("D14", 12), rep("D32", 62), rep("D35", 62), rep("H00", 63), rep("H01", 58), rep("H02", 61), rep("H03", 63), rep("H04", 62), rep("H05", 62), rep("H06", 62), rep("H07", 60), rep("H12", 63), rep("H12A", 62), rep("H14", 62), rep("H15", 11))
+print(poplist.names)
+```
+
+Plot the first two PC axes
+
+```
+plot(x, option = "scores", i = 1, j = 2, pop = poplist.names)
+```
+
+![Alt text]( PC1_PC2_all.jpeg?raw=true "Title")
+
+
+As you can see, there is significant population structure here. Plots were created for ascending pairs of PCs, up until K40. We found that there is no strong population structure at K23/24.
+
+```
+plot(x, option = "scores", i = 23, j = 24, pop = poplist.names)
+```
+
+![Alt text]( PC23_PC24_all.jpeg?raw=true "Title")
+
+Based on these results, and those from the scree plot, we chose K=23.
+
+A PCA was performed on the genotype matrix, and a summary was produced.
+
+```
+x <- pcadapt(filename, K = 23)
+summary(x)
+```
+
+See https://bcm-uga.github.io/pcadapt/articles/pcadapt.html for various plot summaries of the data.
+
+For a given  (real valued number between 0 and 1), SNPs with q-values less than  will be considered as outliers with an expected false discovery rate bounded by . The false discovery rate is defined as the percentage of false discoveries among the list of candidate SNPs. We chose a false discovery rate of 1%. 
+
+```
+qval <- qvalue(x$pvalues)$qvalues
+alpha <- 0.01 #1% false discovery rate
+```
+
+The outliers were extracted and sent to an output file.
+```
+all_outliers <- which(qval < alpha)
+all_outliers
+write(all_outliers, file = "all_outliers.txt",ncolumns = 1 ,append = FALSE, sep = "/t")
+```
+
+```get.pc``` summarises which PCs are the most correlated with each outlier SNP
+
+```
+snp_pc <- get.pc(x, all_outliers)
+```
+
+We then removed these detected outliers from the VCF file. When reading a VCF file, PCAdapt records SNPs as numbers ascending from 1 (corresponding to their order in the input file). Therefore the outliers from PCAdapt were numbers. We need to cross reference these numbers with the SNP IDs in the VCF file. We first extracted the ID column of the VCF file. 
+bcftools query -f ' %ID \n' all_rel_50pp_80md_HWE_MAF0.05.vcf > all_rel_50pp_80md_HWE_MAF0.05_IDs.txt
+
+The text file was opened in excel, and in a new column, the numbers 1 onwards were added in an additional column. The list of outliers for were added to another column. VLOOKUP was used to find the corresponding SNP IDs for the SNP numbers. This file was saved as all_outliers_IDs.txt. We used ```PLINK``` to remove these outliers. 
+
+```
+./plink --vcf all_rel_50pp_80md_HWE_MAF0.05.vcf --exclude all_outliers_IDs.txt --export vcf --allow-extra-chr --out all_rel_50pp_80md_HWE_MAF0.05_neutral
+```
+
+####Selection of unlinked SNPs
+
+To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to keep one SNP per 2000bp. 
+
+```
+./plink --vcf all_rel_50pp_80md_HWE_MAF0.05_neutral.vcf --make-bed --bp-space 2000 --allow-extra-chr --vcf-half-call m  --export vcf --out all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked
+```
+
+This is the *full-unlinked dataset*, used to construct the phylogeny, and for the population structure analysis across all populations. 
+
+
 .....
 
 
