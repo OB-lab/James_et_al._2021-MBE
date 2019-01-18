@@ -12,7 +12,7 @@ NPOP2
 //Number of migration matrices : 0 implies no migration between demes
 2
 //Migration matrix 0: to be estimated
-0 MIG21
+0 MIG12
 0 0
 //Migration matrix 1
 0 0
