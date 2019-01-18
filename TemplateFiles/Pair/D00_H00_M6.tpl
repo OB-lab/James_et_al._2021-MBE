@@ -1,4 +1,4 @@
-// Two populations - D00_H00 - M6 Dune to Headland secondary contact
+// Two populations - D00_H00 - M6 Headland to Dune secondary contact
 2
 //Population effective sizes: to be estimated
 NPOP1
