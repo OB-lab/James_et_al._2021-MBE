@@ -383,6 +383,11 @@ To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to retain on
 
 This was the final filtering step of the *full-unlinked dataset*, which was used to construct the phylogeny, and for the population structure analysis across all populations. 
 
+### ES dataset
+...
+
+### ES-unlinked dataset
+...
 
 # Phylogeny
 
@@ -407,8 +412,7 @@ iqtree -s all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts -m TVMe+
 To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
 
 # Population structure and admixture
-
-.....
+...
 
 
 # fastsimcoal
