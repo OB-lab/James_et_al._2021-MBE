@@ -418,7 +418,7 @@ To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code
 # Gene flow detection with fastsimcoal
 
 
-```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
+```fastsimcoal``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
 
 For working, ```fastsimcoal``` requires three input files: 
 	+ A site frequency spectrum file.
@@ -433,7 +433,7 @@ A SFS is referred as *folded* when the information about the ancestral/derived s
 
 Since the SFS strictly only considers SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data should be downsampled to the number of chromosomes (haploid samples) that maximises the number of SNPs without missing data. This heavily relies on the quality of the sequence. In this regard, sequencing depth outweights sample size in importance.
 
-```easySFS``` is a Python script (freely available here: <https://github.com/isaacovercast/easySFS>) that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file could be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
+```easySFS``` is a Python script (available at <https://github.com/isaacovercast/easySFS>) that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file could be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
 
 ```
 perl getpopmap.pl input.vcf popmap.txt NamePop1 NamePop2 NamePop3
@@ -722,16 +722,16 @@ Information theory offers an objective way to calculate the probability of multi
 For a given model i, its Akaike weight **w <sub>i</sub>** is equal to **exp(−Δ <sub>i</sub> /2) / ∑ from r=1 to R of exp(−Δ <sub>r</sub> /2)**.
 
 
-```Δ``` being the difference between the AIC value of a particular model and the AIC value of the best model of the set and **R** being the total number of models in the set.  The Akaike weight values of all the models should sum up 1.0. It is read as the weight of evidence in favor of the model assuming that the actual best model is present in the set of models.
+```Δ``` being the difference between the AIC value of a particular model and the AIC value of the best model of the set and **R** being the total number of models in the set.  The Akaike weight values of all the models should sum up 1.0. It is read as the weight of evidence in favour of the model assuming that the actual best model is present in the set of models.
 
-The files containing the AIC values (\*.bestlhood) of the best run per model were extracted in a new directory by running the custom Perl script ```extract_ml.pl``` as shown above. 
+The files containing the AIC values (*\*.bestlhood*) of the best run per model were extracted in a new directory by running the custom Perl script ```extract_ml.pl``` as shown above. 
 
 
 ## Estimating the confidence intervals
 
 We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and its corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
-For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* (\*.par) input file. This file can be generated editing the *maximum likelihood parameter* file (\_maxL.par) output by ```fastsimcoal```. The last three sections of this file usually looks like:
+For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* (*\*.par*) input file. This file can be generated editing the *maximum likelihood parameter* file (*\*_maxL.par*) output by ```fastsimcoal```. The last three sections of this file usually look like:
 
 ```
 //Number of independent loci [chromosome] 
@@ -742,7 +742,7 @@ For simulating the DNA and SFS of the chosen model, the parameter values of its 
 FREQ 1 0 1e-8
 ```
 
-They should be slightly modified to specified that a DNA sequence, representing a given number (10,000) of independent loci of a particular lenght (e.g. 100 bp), should be simulated. It also should be renamed as \*.par. After this, the *parameter* file should look like:
+They should be slightly modified to specified that a DNA sequence, representing a given number (*i.e.* 10,000) of independent loci of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the *parameter* file should look like:
 
 ```
 //Number of independent loci [chromosome] 
@@ -753,22 +753,22 @@ They should be slightly modified to specified that a DNA sequence, representing 
 DNA 100 0 1e-8 OUTEXP
 ```
 
-The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal``` to simulate the specified number of SFS files in independent directories and then copies the *estimation* and *template* files of the chosen model to the newly created directories. The *estimation*, *template*, and *parameter values* (\*.pv) files of the best run of the chosen model shoul be previouly copied to the working directory.
+The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal``` to simulate the specified number of SFS files in independent directories and then copies the  *estimation*, *template*, and *parameter values* (\*.pv) files of the chosen model to the newly created directories. Those three files of the best run of the chosen model should be previously copied to the working directory. The *parameter values* file is used to specify the initial parameter values of the new runs.
 
 ```
-perl runboot1.pl D00_H00 100
+perl runboot1.pl POP1_POP2 100
 ```
 
-The first argument corresponds to the root name of the population pair or triad and the second argument correspons to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_POP1_POP2.sh``` recalculates the parameter values given the simulated SFS. 
+The first argument corresponds to the root name of the population pair or triad and the second argument corresponds to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_POP1_POP2.sh``` recalculates the parameter values given the simulated SFS. 
 
 ```
-qsub runboot_D00_H00.sh
+qsub runboot_POP1_POP2.sh
 ```
 
-The custom Perl script ```runboot2.pl``` extracts the parameter values of all the replicate runs as a table into a new file.
+The custom Perl script ```runboot2.pl``` extracts the parameter values of all the replicate runs in a text file.
 
 ```
-perl runboot2.pl D00_H00 100
+perl runboot2.pl POP1_POP2 100
 ```
 
 The 95% confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. 
@@ -780,14 +780,12 @@ groupwiseMean(Vi ~ 1,
               digits=6)
 ```
 
-Where ```Vi``` corresponds to the column name of the parameter of interest (*i.e.* V1 for ancentral size) and ```Table``` corresponds to the matrix containing the parameter values of all the replicates. 
+Where ```Vi``` corresponds to the column name of the parameter of interest (*i.e.* V1 for ancestral size) and ```Table``` corresponds to the matrix containing the parameter values of all the replicates. 
 
 
 # TreeMix
 
 
 
-## References
-fastsimcoal 
-easySFS
+
 
