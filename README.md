@@ -483,7 +483,7 @@ The *template* file specifies the evolutionary model and the parameters that sho
   
   + Migration matrix: It should contain one matrix per migration matrix, as mentioned in the previous section. The program indexes the first migration matrix as 0, the second one as 1, and so on. Rows/columns keep the rationale from/to. If the migration rate is unknown, a parameter name should be specified instead in the corresponding cell to be calculated (*i.e.* MIG12, MIG21).
   
-  + Historical events: This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottle neck, admixture event, coalescence of population, etc. Each historical event should be specified in a different line and be defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e.* TDIV, RESIZE).
+  + Historical events: This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottle neck, admixture event, coalescence of population, etc. Each historical event should be specified in a different line and be defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e. TDIV, RESIZE*).
     
     - Number of generations in the past at which the historical event happened.
     - Source population.
@@ -499,7 +499,7 @@ The *template* file specifies the evolutionary model and the parameters that sho
   
   + Genetic properties: Data type, number of markers, recombination rate, and mutation rate. FREQ in the data type field specifies to estimate the SFS with the simulations.
   
-Every section is introduced by a comment line starting with the characters ```//```. The name of the *template* file must be the root name of the SFS file plus the extention ```.tpl```. For instance, the corresponding *template* file name of *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.tpl*.
+Every section is introduced by a comment line starting with the characters ```//```. The name of the *template* file must be the root name of the SFS file plus the extention *.tpl*. For instance, the corresponding *template* file name of *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.tpl*.
 
 For the Dune-Headland pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the *D00-H00* pair are in the directory ```TemplateFiles/Pair```. Beware file names were modified to distinguish among models here. They assume Dune population comes first in the SFS file.
 
@@ -610,7 +610,7 @@ The *estimation* file specifies the search range of the parameters defined in th
   
   + Complex parameters: It defines parameters that are obtained as simple operations between other parameters. For instance, the migration rate *MIG12* is calculated as the number of migrants *NM12* divided by the population size of the source population *NPOP1*.
   
-The name of the *estimation* file must be the root name of the SFS file plus the extension ```.est```. For instance, the corresponding *estimation* file name of the *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.est*. Sample estimation files for the *D00_H00* pair are in the directory ```EstimationFiles/Pair``` and for the *D32-H12-H12A* triad are in the directory ```EstimationFiles/Triad```.
+The name of the *estimation* file must be the root name of the SFS file plus the extension *.est*. For instance, the corresponding *estimation* file name of the *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.est*. Sample estimation files for the *D00_H00* pair are in the directory ```EstimationFiles/Pair``` and for the *D32-H12-H12A* triad are in the directory ```EstimationFiles/Triad```.
 
 This is how an *estimation* file for a population pair looks like:
 
