@@ -25,7 +25,7 @@ bwa index -a is reference.fasta
 For each individual, we aligned reads to the reference genome with the ```BWA-MEM``` algorithm. The _1 and _2 files correspond to the forward and reverse read files for each individual.
 
 ```
-bwa mem -M reference.fasta ind1_1.fastq ind1_2.fastq >ind1.sam 2>log_file.log
+bwa mem -M reference.fasta ind1_1.fastq ind1_trim_2.fastq >ind1.sam 2>ind1_sam.log
 ```
 
 The *sam* files were converted to *bam* files with ```SamTools```.
@@ -62,10 +62,10 @@ However, when jointly calling SNPs, you must be careful with how the variant cal
 
 Due to computational constraints, we excluded contigs with extremely high coverage (removal of a contig if any site was >1,000X for an individual). This was an arbitrary cut-off value. Even if we called SNPs within these high coverage regions, these sites would have been removed in the downstream filtering steps due to their high coverage.
 
-We ran ```FreeBayes``` for each of the 23 populations.
+We ran ```FreeBayes``` for each of the 23 populations. The code below shows and example with two populations.
 
 ```
-./freebayes -f reference.fasta ind1.sort.rg.bam ind2.sort.rg.bam --use-best-n-alleles 4 --report-monomorphic --genotype-qualities  –targets high_coverage_regions.bed >pop1_joint_raw.vcf
+./freebayes -f reference.fasta ind1.sort.rg.bam ind2.sort.rg.bam --use-best-n-alleles 4 --report-monomorphic --genotype-qualities  –targets high_coverage_regions.bed >pop1.vcf
 ```
 
 ## Normalisation and merging of SNP cohorts
@@ -75,37 +75,37 @@ Because SNPs were jointly called per population, it is crucial to normalise thes
 The first step of the normalisation process was to split multiallelic sites into biallelic records for each jointly-called VCF file with ```BCFtools```. This was to ensure each that each VCF file was recording multiallelic sites in the same way (see next step).
 
 ```
-bcftools norm input.vcf -m +any -o output.vcf
+bcftools norm pop1.vcf -m +any -o pop1_unnorm.vcf
 ```
 
 Each file was then normalised by re-joining biallelic sites into multiallelic records. This was to ensure that the multiallelic records were consistently recorded for each population.
 
 ```
-bcftools norm input.vcf -m +any -o output.vcf
+bcftools norm pop1_unnorm.vcf -m +any -o pop1_unnorm_norm.vcf
 ```
 
 For each population, indels were left-aligned and normalised. This was to ensure complex regions (such as indels or short tandem repeats) were normalised the same way for each population. See: https://genome.sph.umich.edu/wiki/Variant_Normalization
 
 ```
-bcftools norm input.vcf -f reference.fasta -o output.vcf
+bcftools norm pop1_unnorm_norm t.vcf -f reference.fasta -o pop1_unnorm_norm_align.vcf
 ```
 
 VCF output files from ```FreeBayes``` sometimes contain biallelic block substitutions. For instance, instead of having one SNP per line, blocks of multiple SNPs sometimes exist. As we have a separate VCF file per population, different biallelic blocks may exist for each population. If these are merged without decomposing them, repeated SNPs will exist within the file (a variant may be present within a biallelic block, but also on a separate line). Therefore, we used ```vt``` to decompose biallelic block substitutions into separate SNPs for each population.
 
 ```
-vt decompose_blocksub -p input.vcf -o output.vcf
+vt decompose_blocksub -p pop1_unnorm_norm_align.vcf -o pop1_unnorm_norm_align_decomp.vcf
 ```
 
 Each VCF file was zipped and then indexed.
 
 ```
-bgzip -c input.vcf > output.vcf.gz  ;  tabix -p vcf input.vcf.gz
+bgzip -c pop1_unnorm_norm_align_decomp.vcf > pop1_unnorm_norm_align_decomp.vcf.gz  ;  tabix -p vcf pop1_unnorm_norm_align_decomp.vcf.gz
 ```
 
-All VCF files were merged into one joint file.
+All VCF files were merged into one joint file. The example below is for two populations
 
 ```
-bcftools merge input1.vcf.gz input2.vcf.gz -o output.vcf
+bcftools merge pop1_unnorm_norm_align_decomp.vcf.gz pop2_unnorm_norm_align_decomp.vcf.gz -o all_joint.vcf
 ```
 
 ## SNP filtering
@@ -178,7 +178,7 @@ To ensure that each SNP is sequenced in every population, we filtered for missin
 mawk '$2 == "D00"' all_inds_pops.txt > D00_keep && mawk '$2 == "D01"' all_inds_pops_mac1.txt > D01_keep && mawk '$2 == "D02"' all_inds_pops_mac1.txt > D02_keep
 ```
 
-For each of the 23 populations we used VCFtools to calculate the proportion missing data per variant site. The below lines of code are and example for three populations. They produce output files called *D00.lmiss*, *D01.lmiss* and *D02.lmiss*, the 6th column containing the proportion of missing data for each site. 
+For each of the 23 populations we used VCFtools to calculate the proportion of missing data per variant site. The below lines of code are an example for three populations. They produce output files called *D00.lmiss*, *D01.lmiss* and *D02.lmiss*, the 6th column containing the proportion of missing data for each site. 
 
 ```
 vcftools --vcf all_joint_FB.Q30mac1dp3irMaxDP100MinDP10.recode.vcf --keep D00_keep --missing-site --out D00
@@ -224,7 +224,7 @@ We filtered for Hardy Weinberg Equilibrium within each population using the ```d
 
 (This file was renamed to: *all_rel_50pp_80md_HWE.vcf*)
 
-We also explored variations of the above SNP filtering parameters, ranging from ‘relaxed’ to ‘intermediate’ to ‘stringent’ parameters. We plotted PCAs to examine whether the clustering of populations was robust to variations in the way SNPs were filtered. We also explored further filtering steps outlined in the ```dDocent``` SNP filtering pipeline (http://ddocent.com/filtering/). We found that populations consistently grouped into the same clusters, suggesting our data is robust to slight variations in SNP quality, and SNP numbers. Within our paper (the code presented above), we have used an ‘intermediate’ level of filtering.
+We also explored variations of the above SNP filtering parameters, ranging from ‘relaxed’ to ‘intermediate’ to ‘stringent’ parameters. We plotted PCAs to examine whether the clustering of populations was robust to variations in the way SNPs were filtered. We also explored further filtering steps outlined in the ```dDocent``` SNP filtering pipeline (http://ddocent.com/filtering/). We found that populations consistently grouped into the same clusters, suggesting our data is robust to slight variations in SNP quality and SNP numbers. Within our paper (the code presented above), we have used an ‘intermediate’ level of filtering.
 
 However, despite the normalisation process before merging the per-population VCF files (outlined above), a few duplicate SNPs remined within the final VCF file. These were removed. First, the chromosome number and variant position were extracted from: *all_rel_50pp_80md_HWE.vcf *, with a colon separating them. 
 
@@ -294,7 +294,7 @@ A PCA was performed with K principal components.
 x <- pcadapt(input = file, K = 40)
 ```
 
-We visualised how much variance each principal component explained with a scree plot. 
+We visualised how much variance each principal component explaines with a scree plot. 
 
 ```
 plot(x, option = "screeplot")
@@ -304,9 +304,7 @@ plot(x, option = "screeplot")
 
 The scree plot corresponds to the eigenvalues in decreasing order. The eigenvalues that correspond to random variation lie on the straight line whereas the ones that correspond to population structure lie on the curve. It is recommended to choose a K value that corresponds to where the curve meets the line. In our case, this is K=23 (which also corresponds to the number of populations with our study).
 
-We can also use an alternative method to choose K, which involves graphing the data onto different PC axes. When there is a random scatter of points, the principal components thus do not provide any information about population structure. You should then choose K to equal the last PC that shows population structure.
-
-First, a list of the population names (corresponding to the order of individuals in the input file) is supplied so each population can be plotted as a different colour.
+We can also use an alternative method to choose K, which involves graphing the data onto different PC axes. When you observe a random scatter of points, the principal components do not provide any information about population structure. You should then choose K to equal the last PC that shows population structure.To do this, we first created a list of the population names (corresponding to the order of individuals in the input file) so each population can be plotted as a different colour.
 
 ```
 poplist.names <- c(rep("D00", 62), rep("D01", 60), rep("D02", 62), rep("D03", 61), rep("D04", 62), rep("D05", 62), rep("D09", 63), rep("D12", 62), rep("D14", 12), rep("D32", 62), rep("D35", 62), rep("H00", 63), rep("H01", 58), rep("H02", 61), rep("H03", 63), rep("H04", 62), rep("H05", 62), rep("H06", 62), rep("H07", 60), rep("H12", 63), rep("H12A", 62), rep("H14", 62), rep("H15", 11))
@@ -361,7 +359,7 @@ write(all_outliers, file = "all_outliers.txt",ncolumns = 1 ,append = FALSE, sep 
 snp_pc <- get.pc(x, all_outliers)
 ```
 
-We then removed these detected outliers from the VCF file. When given a VCF file, ```PCAdapt``` records SNPs as numbers ascending from 1 (corresponding to their order in the input file). Therefore, the outliers from PCAdapt were numbers. We need to cross reference these numbers with the SNP IDs in the VCF file. We first extracted the ID column of the VCF file.
+We then removed these outliers from the VCF file. When given a VCF file, ```PCAdapt``` records SNPs as numbers ascending from 1 (corresponding to their order in the input file). Therefore, the outliers from PCAdapt were numbers. We need to cross reference these numbers with the SNP IDs in the VCF file. We first extracted the ID column of the VCF file.
 
 ```
 bcftools query -f ' %ID \n' all_rel_50pp_80md_HWE_MAF0.05.vcf > all_rel_50pp_80md_HWE_MAF0.05_IDs.txt
@@ -383,6 +381,7 @@ To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to retain on
 
 This was the final filtering step of the *full-unlinked dataset*, which was used to construct the phylogeny, and for the population structure analysis across all populations. 
 
+
 ### ES dataset
 ...
 
@@ -391,13 +390,13 @@ This was the final filtering step of the *full-unlinked dataset*, which was used
 
 # Phylogeny
 
-We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with the *full-unlinked dataset* with the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py``` was then used to convert the fasta file to a counts file, found here: https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py.   
+We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with the *full-unlinked dataset* with the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py```  (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This counts file summarises the allele frequencies for each population.
 
 ```
 FastaToCounts.py all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.fasta.gz all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts
 ```
 
-This counts file summarises the allele frequencies for each population. We then used ```ModelFinder``` to determine the best-fit substitution model for the data. The D09 population from Western Australia was assigned as the outgroup. 
+We then used ```ModelFinder``` to determine the best-fit substitution model for the data. The D09 population from Western Australia was assigned as the outgroup. 
 
 ```
 iqtree -s all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts -m MF -o D09 -pre ModelFinder
@@ -410,6 +409,7 @@ iqtree -s all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked_renamed.counts -m TVMe+
 ```
 
 To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
+
 
 # Population structure and admixture
 ...
