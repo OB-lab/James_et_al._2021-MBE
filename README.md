@@ -421,9 +421,10 @@ To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code
 ```fastsimcoal``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
 
 For working, ```fastsimcoal``` requires three input files: 
-	+ A site frequency spectrum file.
-	+ A *template* file. 
-	+ An *estimation* file.
+
+  + A site frequency spectrum file.
+  + A *template* file.
+  + An *estimation* file.
 
 ## Getting the site frequency spectrum (SFS) file
 
