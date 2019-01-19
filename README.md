@@ -415,7 +415,7 @@ To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code
 ...
 
 
-# fastsimcoal
+# Gene flow detection with fastsimcoal
 
 
 ```fastsimcoal``` is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
@@ -472,7 +472,7 @@ The *template* file specifies the evolutionary model and the parameters that sho
 
   + Number of populations.
   
-  + Populations effective size: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e.* NPOP1, NPOP2). For diploid species, it corresponds to twice the number of individuals. The order of the populations all along this file should be the same than in the SFS file, which usually is alphabetically sorted based on the population names. The program indexes the first population as 0, the second one as 1, and so on.
+  + Populations effective size: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e. NPOP1, NPOP2*). For diploid species, it corresponds to twice the number of individuals. The order of the populations all along this file should be the same than in the SFS file, which usually is alphabetically sorted based on the population names. The program indexes the first population as 0, the second one as 1, and so on.
   
   + Samples size: It should contain one line per population and follow the populations order specified in the previous section. Sizes should be given in haploid numbers. It corresponds to the number of projections used in ```easySFS``` for downsampling.
   
@@ -558,7 +558,7 @@ For the population triads, we considered a nested-models approach because the nu
   + Model 8: Bidirectional migration among all populations.
   + Model 9: Bidirectional migration between the A-B ancestor and C.
 
-Beware that, contrary to the population pairs case where the *template* files of the same model are quite the same among different pairs because the Dune population always comes first in the SFS file and the Headland population comes second and the phylogenetic relationships among populations are the same regardless their order, the template files of the same model vary from one triad to another and they should be carefully inspected case by case. Sample template files for the D32-H12-H12A triad are in the directory ```TemplateFiles/Triad```. Beware file names were modified to distinguish among models here.
+Beware that, contrary to the population pairs case where the *template* files of the same model are quite the same among different pairs because the Dune population always comes first in the SFS file and the Headland population comes second and the phylogenetic relationships among populations are the same regardless their order, the template files of the same model vary from one triad to another and they should be carefully inspected case by case. Sample template files for the *D32-H12-H12A* triad are in the directory ```TemplateFiles/Triad```. Beware file names were modified to distinguish among models here.
 
 This is how a template file for a population triad looks like:
 
@@ -679,31 +679,31 @@ TDIV1 < TDIV2
 
 ## Running fsc
 
-Running ```fastsimcoal``` is easy if the three input files are well formatted. All the files should be in the same folder from where the command is invoked. 
+Running ```fastsimcoal``` is easy if the three input files are well formatted. All the files should be in the same directory from where the command is invoked. 
 
 ```
 fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
 ```
 
-The ```-t``` and  ```-e``` flags specify the template and estimation files, respectively, the ```-n``` flag specifies the number of SFS simulations to fit to the data, the ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, the ```-L``` flag specifies the number of optimisation cycles, the ```-c``` specifies the number of threads to be used for simulations, and the ```-q``` flag keeps output messages at the minimum level.
+The ```-t``` and  ```-e``` flags specify the *template* and *estimation* files, respectively, the ```-n``` flag specifies the number of SFS simulations to fit to the data, the ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, the ```-L``` flag specifies the number of optimisation cycles, the ```-c``` flag specifies the number of threads to be used for simulations, and the ```-q``` flag keeps output messages at the minimum level.
 
-Reaching realible results depends at some extend on how well the parameters space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the best maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` helps to create the required directories and copy the input files into them for launching the independent runs.
+Reaching reliable results depends at some extend on how well the parameters space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates the required directories and copy the input files into them for launching the independent runs.
 
 ```
 perl mkdir_in.pl 7 75
 ```
 
-The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launch per model. Running this is best done in parallel in a server. The custom shell executable script ```runPOP1_POP2.sh``` just launch the jobs this way.
+The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launch per model. Since testing the different models demands running ```fastsimcoal``` multiple times, it is best done in a server. The custom shell executable script ```runPOP1_POP2.sh``` executes the program in all the above created directories per model.
 
 ```
 qsub runPOP1_POP2.sh
 ```
 
-The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each directory should contain the three input files for running ```fastsimcoal```. 
+The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each of them should contain the three input files for running ```fastsimcoal```. 
 
 ## Summarising the results
 
-```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e.* POP1_POP2), that contains most of the relevant output files. ```POP1_POP2.bestlhoods``` is particularly useful for summarising the estimated parameter values and ```POP1_POP2.brent_lhoods``` for evaluating the run performance. The custom Perl script ```extract_ml.pl``` reads the ```POP1_POP2.bestlhoods``` across all the runs per model and summarises their maximum likelihood value in a table. It also copies both of the above mentioned files of the best run per model in a new directory, named ```results_POP1_POP2```. 
+```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e. POP1_POP2*), that contains the relevant output files. *POP1_POP2.bestlhoods* is particularly useful for summarising the estimated parameter values and *POP1_POP2.brent_lhoods* for evaluating the run performance over the optimisation cycles. The custom Perl script ```extract_ml.pl``` reads the *POP1_POP2.bestlhoods* across all the runs per model and extracts their maximum likelihood value in a table. Based on those values, it identifies the miximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_POP1_POP2```. The name of those files are modified to distinguish among models.
 
 ```
 perl extract_ml.pl 7 75 D00_H00
@@ -711,7 +711,7 @@ perl extract_ml.pl 7 75 D00_H00
 
 The first argument corresponds to the number of models, the second argument corresponds to the number of independent runs per model, and the third argument corresponds to the root name of the files. ```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. 
 
-The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of fastsimcoal runs across the different models and populations. It generates a PDF file showing, in the first section, boxplots of the maximum likelihood values of all runs per model per population pair and triad and, in the second section, scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad. By inspecting these plots, we can get a quick idea about the overall performance of the parameter space exploration. This is how they look like:
+The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal``` runs across the different models and population pairs and triads. It generates a PDF file showing boxplots of the maximum likelihood values of all runs per model per population pair and triad in the first section and scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad in the second section. By inspecting these plots, we can get a general idea about the overall performance of the parameter space exploration. This is how the plots look like:
 
 ![Alt text](plot_fsc_performance.jpg?raw=true "Title")
 
