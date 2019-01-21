@@ -434,7 +434,7 @@ A SFS is referred as *folded* when the information about the ancestral/derived s
 
 Since the SFS strictly only considers SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data should be downsampled to the number of chromosomes (haploid samples) that maximises the number of SNPs without missing data. This heavily relies on the quality of the sequence. In this regard, sequencing depth outweights sample size in importance.
 
-```easySFS``` is a Python script (available at <https://github.com/isaacovercast/easySFS>) that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file could be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
+```easySFS``` is a Python script (available at <https://github.com/isaacovercast/easySFS>) that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file can be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
 
 ```
 perl getpopmap.pl input.vcf popmap.txt NamePop1 NamePop2 NamePop3
@@ -459,7 +459,7 @@ Pop2
 (2, 68.0)   (3, 96.0)   (4, 106.0)  (5, 110.0)  (6, 118.0)  (7, 109.0)   (8, 106.0)   (9, 96.0)   (10, 86.0)
 ```
 
-In this example, projections *7* and *6* maximise the number of kept SNPs in population 1 and 2, respectively. These numbers should be specified with the ```--proj``` flag in the next step. The ```-a``` flag means all the SNPs are considered, otherwise, a single SNP would be randomly sampled per locus. The ```-o``` flag specifies the output directory.
+In this example, projections *7* and *6* maximise the number of kept SNPs in population 1 and 2, respectively. These numbers should be specified with the ```--proj``` flag in the next step. The ```-a``` flag means all the SNPs are considered, otherwise, a single SNP is randomly sampled per locus. The ```-o``` flag specifies the output directory.
 
 ```
 easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_directory -a
@@ -469,13 +469,13 @@ easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_directory -a
 
 ## Getting the template file
 
-The *template* file specifies the evolutionary model and the parameters that should be estimated. It is divided in ten fixed sections in the following order:
+The *template* file specifies the evolutionary model and the parameters that should be estimated. It is divided into ten fixed sections in the following order:
 
   + Number of populations.
   
-  + Populations effective size: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e. NPOP1, NPOP2*). For diploid species, it corresponds to twice the number of individuals. The order of the populations all along this file should be the same than in the SFS file, which usually is alphabetically sorted based on the population names. The program indexes the first population as 0, the second one as 1, and so on.
+  + Population effective sizes: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e. NPOP1, NPOP2*). For diploid species, it corresponds to twice the number of individuals. The order of the populations in this file should be the same as in the SFS file, which usually is alphabetically sorted based on the population names. The program indexes the first population as 0, the second one as 1, and so on.
   
-  + Samples size: It should contain one line per population and follow the populations order specified in the previous section. Sizes should be given in haploid numbers. It corresponds to the number of projections used in ```easySFS``` for downsampling.
+  + Sample sizes: It should contain one line per population and follow the population order specified in the previous section. Sizes should be given in haploid numbers. It corresponds to the number of projections used in ```easySFS``` for downsampling.
   
   + Growth rates: It should contain one line per population. A zero growth rate means stationary population size. Negative growth implies population expansion since it is estimated backward in time.
   
@@ -483,7 +483,7 @@ The *template* file specifies the evolutionary model and the parameters that sho
   
   + Migration matrix: It should contain one matrix per migration matrix, as mentioned in the previous section. The program indexes the first migration matrix as 0, the second one as 1, and so on. Rows/columns keep the rationale from/to. If the migration rate is unknown, a parameter name should be specified instead in the corresponding cell to be calculated (*i.e.* MIG12, MIG21).
   
-  + Historical events: This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottle neck, admixture event, coalescence of population, etc. Each historical event should be specified in a different line and be defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e. TDIV, RESIZE*).
+  + Historical events: This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottlenecks, admixture events, coalescence of populations, etc. Each historical event should be specified in a different line and be defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e. TDIV, RESIZE*).
     
     - Number of generations in the past at which the historical event happened.
     - Source population.
@@ -501,7 +501,7 @@ The *template* file specifies the evolutionary model and the parameters that sho
   
 Every section is introduced by a comment line starting with the characters ```//```. The name of the *template* file must be the root name of the SFS file plus the extention *.tpl*. For instance, the corresponding *template* file name of *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.tpl*.
 
-For the Dune-Headland pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the *D00-H00* pair are in the directory ```TemplateFiles/Pair```. Beware file names were modified to distinguish among models here. They assume Dune population comes first in the SFS file.
+For the Dune-Headland pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the *D00-H00* pair are in the directory ```TemplateFiles/Pair```. Beware file names were modified to distinguish among models here. They assume the Dune population comes first in the SFS file.
 
   + Model 1: No migration.
   + Model 2: Bidirectional migration.
@@ -545,9 +545,9 @@ TSEC 0 1 0 1 0 1
 FREQ 1 0 1e-8
 ```
 
-In this file, *NPOP1*, *NPOP2*, *MIG21*, *MIG12*, *TDIV*, *RESIZE*, and *TSEC* are the unknown parameters to be estimated by ```fastsimcoal```. They all should be as well specified in the corresponding *estimation* file.
+In this file, *NPOP1*, *NPOP2*, *MIG21*, *MIG12*, *TDIV*, *RESIZE*, and *TSEC* are the unknown parameters to be estimated by ```fastsimcoal```. They also be specified in the corresponding *estimation* file.
 
-For the population triads, we considered a nested-models approach because the number of possible demographic models considerably increases with more than two populations. Nine initial models, ranging from no migration to bidirectional migration among all populations, are first fitted to data and then different nested variants of the best model are explored, such as unidirectional migration or migration after secondary contact.
+For the population triads, we considered a nested-model approach because the number of possible demographic models considerably increases with more than two populations. Nine initial models, ranging from no migration to bidirectional migration among all populations, are first fitted to the data and then different nested variants of the best model are explored, such as unidirectional migration or migration after secondary contact.
 
   + Model 1: No migration. 
   + Model 2: Bidirectional migration between A and B.
@@ -602,7 +602,7 @@ FREQ 1 0 1e-8
 
 ## Getting the estimation file
 
-The *estimation* file specifies the search range of the parameters defined in the *template* file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided in three fixed sections in the following order:
+The *estimation* file specifies the search range of the parameters defined in the *template* file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided into three fixed sections in the following order:
   
   + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either recorded or omitted in the output files. Some parameters, such as *ANCSIZE*, are specified in this section despite they were not invoked in the *template* file. This is because they are later used to calculate other complex parameters that indeed were specified in the *template* file, such as *RESIZE* (see below).
   
