@@ -604,7 +604,7 @@ FREQ 1 0 1e-8
 
 The *estimation* file specifies the search range of the parameters defined in the *template* file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided into three fixed sections in the following order:
   
-  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either recorded or omitted in the output files. Some parameters, such as *ANCSIZE*, are specified in this section despite they were not invoked in the *template* file. This is because they are later used to calculate other complex parameters that indeed were specified in the *template* file, such as *RESIZE* (see below).
+  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either be recorded or omitted in the output files. Some parameters, such as *ANCSIZE*, are specified in this section despite not being invoked in the *template* file. This is because they are later used to calculate other complex parameters that were specified in the *template* file, such as *RESIZE* (see below).
   
   + Rules: It includes a set of conditions to be met among the above simple parameters. For instance, in a secondary contact model, it should be specified that the secondary contact event happened after the divergence of the involved populations. 
   
@@ -678,7 +678,7 @@ TDIV1 < TDIV2
 0  MIG32  = NM32/HA12       output
 ```
 
-## Running fsc
+## Running fastsimcoal
 
 Running ```fastsimcoal``` is easy if the three input files are well formatted. All the files should be in the same directory from where the command is invoked. 
 
@@ -688,29 +688,29 @@ fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
 
 The ```-t``` and  ```-e``` flags specify the *template* and *estimation* files, respectively, the ```-n``` flag specifies the number of SFS simulations to fit to the data, the ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, the ```-L``` flag specifies the number of optimisation cycles, the ```-c``` flag specifies the number of threads to be used for simulations, and the ```-q``` flag keeps output messages at the minimum level.
 
-Reaching reliable results depends at some extend on how well the parameters space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates the required directories and copy the input files into them for launching the independent runs.
+Reaching reliable results depends to some extent on how well the parameter space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates the required directories and copies the input files into them for launching the independent runs.
 
 ```
 perl mkdir_in.pl 7 75
 ```
 
-The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launch per model. Since testing the different models demands running ```fastsimcoal``` multiple times, it is best done in a server. The custom shell executable script ```runPOP1_POP2.sh``` executes the program in all the above created directories per model.
+The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launched per model. Since testing the different models demands running ```fastsimcoal``` multiple times, it is best done in a server. The custom shell executable script ```runPOP1_POP2.sh``` executes the program in all the above created directories per model.
 
 ```
 qsub runPOP1_POP2.sh
 ```
 
-The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. Each of them should contain the three input files for running ```fastsimcoal```. 
+The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive numbers from 1 to the maximum number of different models. Each of them should contain the three input files for running ```fastsimcoal```. 
 
 ## Summarising the results
 
-```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e. POP1_POP2*), that contains the relevant output files. *POP1_POP2.bestlhoods* is particularly useful for summarising the estimated parameter values and *POP1_POP2.brent_lhoods* for evaluating the run performance over the optimisation cycles. The custom Perl script ```extract_ml.pl``` reads the *POP1_POP2.bestlhoods* across all the runs per model and extracts their maximum likelihood value in a table. Based on those values, it identifies the miximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_POP1_POP2```. The name of those files are modified to distinguish among models.
+```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e. POP1_POP2*), that contains the relevant output files. *POP1_POP2.bestlhoods* is particularly useful for summarising the estimated parameter values and *POP1_POP2.brent_lhoods* for evaluating the run performance over the optimisation cycles. The custom Perl script ```extract_ml.pl``` reads the *POP1_POP2.bestlhoods* across all the runs per model and extracts their maximum likelihood value in a table. Based on those values, it identifies the maximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_POP1_POP2```. The name of those files are modified to distinguish among models.
 
 ```
 perl extract_ml.pl 7 75 D00_H00
 ```
 
-The first argument corresponds to the number of models, the second argument corresponds to the number of independent runs per model, and the third argument corresponds to the root name of the files. ```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive number from 1 to the maximum number of different models. 
+The first argument corresponds to the number of models, the second argument corresponds to the number of independent runs per model, and the third argument corresponds to the root name of the files. ```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive numbers from 1 to the maximum number of different models. 
 
 The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal``` runs across the different models and population pairs and triads. It generates a PDF file showing boxplots of the maximum likelihood values of all runs per model per population pair and triad in the first section and scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad in the second section. By inspecting these plots, we can get a general idea about the overall performance of the parameter space exploration. This is how the plots look like:
 
@@ -720,7 +720,7 @@ The custom R script ```summaryplots_fsc.R``` graphically summarises the performa
 
 Information theory offers an objective way to calculate the probability of multiple demographic models and rank them accordingly, instead of only relying in the Akaike information criterion (AIC) values to decide which is the best model. This approach, namely Akaike weight, is based on the computation of the Kullback-Leibler information of every model using the AIC, followed by the normalization of these values. 
 
-For a given model i, its Akaike weight **w <sub>i</sub>** is equal to **exp(−Δ <sub>i</sub> /2) / ∑ from r=1 to R of exp(−Δ <sub>r</sub> /2)**.
+For a given model **i**, its Akaike weight **w <sub>i</sub>** is equal to **exp(−Δ <sub>i</sub> /2) / ∑ from r=1 to R of exp(−Δ <sub>r</sub> /2)**.
 
 
 ```Δ``` being the difference between the AIC value of a particular model and the AIC value of the best model of the set and **R** being the total number of models in the set.  The Akaike weight values of all the models should sum up 1.0. It is read as the weight of evidence in favour of the model assuming that the actual best model is present in the set of models.
@@ -730,7 +730,7 @@ The files containing the AIC values (*\*.bestlhood*) of the best run per model w
 
 ## Estimating the confidence intervals
 
-We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and its corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
+We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and their corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
 For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* (*\*.par*) input file. This file can be generated editing the *maximum likelihood parameter* file (*\*_maxL.par*) output by ```fastsimcoal```. The last three sections of this file usually look like:
 
@@ -743,7 +743,7 @@ For simulating the DNA and SFS of the chosen model, the parameter values of its 
 FREQ 1 0 1e-8
 ```
 
-They should be slightly modified to specified that a DNA sequence, representing a given number (*i.e.* 10,000) of independent loci of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the *parameter* file should look like:
+They should be slightly modified to specify that a DNA sequence, representing a given number (*i.e.* 10,000) of independent loci of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the *parameter* file should look like:
 
 ```
 //Number of independent loci [chromosome] 
