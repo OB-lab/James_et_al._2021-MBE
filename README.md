@@ -10,7 +10,7 @@ We received de-multiplexed forward and reverse sequencing files for each individ
 
 ## Read alignment
 
-We used ``` TagCleaner``` to remove reverse barcodes from each individual. *tag5* is the reverse barcode sequence (in this example GTCA). *mm5* is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). *trim_within* is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode). 
+We used ``` TagCleaner``` to remove reverse barcodes from each individual. ```-tag5``` is the reverse barcode sequence (in this example GTCA). ```-mm5``` is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). ```-trim_within``` is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode). 
 
 ```
 perl tagcleaner.pl -fastq ind1_2.fq -tag5 GTCA -mm5 1 -trim_within 5 -out ind1_trim_2 -log ind1_trim_2.log
@@ -43,10 +43,10 @@ samtools flagstat ind1.bam &> ind1_stats.txt
 ```PicardTools``` was used to clean bam files (to set soft-clipping for reads beyond end of the reference, and MAPQ to 0 for unmapped reads). PCR duplicates were not marked for removal. 
 
 ```
-java -jar picard.jar CleanSam INPUT=ind1.bam OUTPUT=ind1.cleaned.bam 2>7.ind1.cleaned.bam.log
+java -jar picard.jar CleanSam INPUT=ind1.bam OUTPUT=ind1.cleaned.bam 2>ind1.cleaned.bam.log
 ```
 
-```PicardTools``` was used to add read groups to each individual. *RGID* is the read group ID, (i.e. the name of the individual). *RGLB* is the read group library, (i.e. the sequencing lane number). *RGPU* is the read group platform unit (i.e. run barcode of the lane). *RGSM* is the read group sample name (i.e. the name of the individual).
+```PicardTools``` was used to add read groups to each individual. ```RGID``` is the read group ID, (i.e. the name of the individual). ```RGLB``` is the read group library, (i.e. the sequencing lane number). ```RGPU``` is the read group platform unit (i.e. run barcode of the lane). ```RGSM``` is the read group sample name (i.e. the name of the individual).
 
 ```
 java -jar picard.jar AddOrReplaceReadGroups INPUT=ind1.cleaned.bam OUTPUT=ind1.sort.rg.bam SORT_ORDER=coordinate RGID=ind1 RGLB=lib1 RGPL=ILLUMINA RGPU= HC2TFBBXX:2 RGSM=ind1 CREATE_INDEX=True 2>ind1.sort.rg.log
@@ -160,7 +160,7 @@ vcftools --vcf all_joint.Q30mac1dp3ir.recode.vcf --site-mean-depth --out mean_de
 
 ![Alt text]( mean_read_depth_all.jpeg?raw=true "Title")
 
-In general, the mean read depth per locus should be approximately normally distributed. Within the literature, various approaches have been used to select the maximum mean read depth. For instance, Li (2014) suggests using the equation: d+3*sqrt(d), d=mean depth (which is a value of 63 for our dataset). However, this method has been suggested as too conservative for RADseq data. Others use the 90th quantile (which is 88 for our data), two times the mode (40 for our data, after rounding the mean depths to the nearest 10), or, others just eyeball the mean depth distribution and remove the upper tail (~120 for our data). After examining these multiple approaches, we chose a maximum mean depth of 100. 
+In general, the mean read depth per locus should be approximately normally distributed. Within the literature, various approaches have been used to select the maximum mean read depth. For instance, Li (2014) suggests using the equation: **d+3*sqrt(d)**, d=mean depth (which is a value of 63 for our dataset). However, this method has been suggested as too conservative for RADseq data. Others use the 90th quantile (which is 88 for our data), two times the mode (40 for our data, after rounding the mean depths to the nearest 10), or, others just eyeball the mean depth distribution and remove the upper tail (~120 for our data). After examining these multiple approaches, we chose a maximum mean depth of 100. 
 
 ```
 vcftools --vcf  all_joint.Q30mac1dp3ir.recode.vcf --recode --recode-INFO-all --out all_joint.Q30mac1dp3irMaxDP100 --max-meanDP 100 
@@ -226,7 +226,7 @@ We filtered for Hardy Weinberg Equilibrium within each population using the ```d
 
 We also explored variations of the above SNP filtering parameters, ranging from ‘relaxed’ to ‘intermediate’ to ‘stringent’ parameters. We plotted PCAs to examine whether the clustering of populations was robust to variations in the way SNPs were filtered. We also explored further filtering steps outlined in the ```dDocent``` SNP filtering pipeline (http://ddocent.com/filtering/). We found that populations consistently grouped into the same clusters, suggesting our data is robust to slight variations in SNP quality and SNP numbers. Within our paper (the code presented above), we have used an ‘intermediate’ level of filtering.
 
-However, despite the normalisation process before merging the per-population VCF files (outlined above), a few duplicate SNPs remined within the final VCF file. These were removed. First, the chromosome number and variant position were extracted from: *all_rel_50pp_80md_HWE.vcf *, with a colon separating them. 
+However, despite the normalisation process before merging the per-population VCF files (outlined above), a few duplicate SNPs remined within the final VCF file. These were removed. First, the chromosome number and variant position were extracted from: *all_rel_50pp_80md_HWE.vcf*, with a colon separating them. 
 
 ```
 bcftools query -f '%CHROM:%POS\n' all_rel_50pp_80md_HWE.vcf > all_rel_50pp_80md_HWE_stats.txt
@@ -379,7 +379,7 @@ To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to retain on
 ./plink --vcf all_rel_50pp_80md_HWE_MAF0.05_neutral.vcf --make-bed --bp-space 2000 --allow-extra-chr --vcf-half-call m  --export vcf --out all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked
 ```
 
-This was the final filtering step of the *full-unlinked dataset*, which was used to construct the phylogeny, and for the population structure analysis across all populations. 
+This was the final filtering step of the *full-unlinked dataset*, which was used to construct the phylogeny, and for the population structure analysis across all populations.
 
 
 ### ES dataset
