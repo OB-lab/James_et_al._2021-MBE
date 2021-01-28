@@ -410,8 +410,9 @@ iqtree -s all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.counts -m TVMe+FQ+P+N19
 
 To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
 
-# Population structure and admixture
-...
+# Is there gene flow between parapatric populations?
+```STRUCTURE``` was used to estimate levels of admixture between ecotypes at each locality. See (STRUCTURE_input) for all input files as well as example ```mainparams``` and ```extraparams``` files. 
+
 
 
 # Gene flow detection with fastsimcoal
