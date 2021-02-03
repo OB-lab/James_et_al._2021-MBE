@@ -1,6 +1,10 @@
 
-This repository contains step-by-step instructions and code for filtering the sequencing data and infering demographic parameters of population of *Senecio lautus* using ```fastsimcoal``` and ```TreeMix```.
+This repository contains step-by-step instructions, code and data for:
+James ME, Arenas-Castro H, Groh JS, Engelstaedter J and Ortiz-Barrientos D. (2020) Highly replicated evolution of parapatric ecotypes [journal] [volume.page] [doi]
 
+# DNA extraction and Genotyping-by-Sequencing
+
+See [CTAB_protocol] (laboratory/CTAB_protocol.doc) for the CTAB DNA extraction protocol, and [GBS_protocol] (laboratory/GBS_protocol.doc) for the Genotyping-by-Sequencing protocol.
 
 # Bioinformatics
 
@@ -10,7 +14,7 @@ We received de-multiplexed forward and reverse sequencing files for each individ
 
 ## Read alignment
 
-We used ``` TagCleaner``` to remove reverse barcodes from each individual. ```-tag5``` is the reverse barcode sequence (in this example GTCA). ```-mm5``` is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). ```-trim_within``` is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode). 
+We used ```TagCleaner``` to remove reverse barcodes from each individual. ```-tag5``` is the reverse barcode sequence (in this example GTCA). ```-mm5``` is the maximum number of mismatches, in this case 1 (we allowed a mismatch of 2 for barcodes 7 nucleotides in length). ```-trim_within``` is the number of bp from the end of the sequence to search for the barcode, in this case 5 (we used one more than the length of the barcode). 
 
 ```
 perl tagcleaner.pl -fastq ind1_2.fq -tag5 GTCA -mm5 1 -trim_within 5 -out ind1_trim_2 -log ind1_trim_2.log
@@ -62,7 +66,7 @@ However, when jointly calling SNPs, you must be careful with how the variant cal
 
 Due to computational constraints, we excluded contigs with extremely high coverage (removal of a contig if any site was >1,000X for an individual). This was an arbitrary cut-off value. Even if we called SNPs within these high coverage regions, these sites would have been removed in the downstream filtering steps due to their high coverage.
 
-We ran ```FreeBayes``` for each of the 23 populations. The code below shows and example with two populations.
+We ran ```FreeBayes``` for each of the 23 populations. The code below shows an example with two populations.
 
 ```
 ./freebayes -f reference.fasta ind1.sort.rg.bam ind2.sort.rg.bam --use-best-n-alleles 4 --report-monomorphic --genotype-qualities  –targets high_coverage_regions.bed >pop1.vcf
@@ -112,12 +116,6 @@ bcftools merge pop1_unnorm_norm_align_decomp.vcf.gz pop2_unnorm_norm_align_decom
 
 We closely followed the ```dDocent``` guidelines for SNP filtering: http://ddocent.com/filtering/. Some of the below is directly from the ```dDocent``` pipeline, so kudos to J. Puritz!
 
-We had three main data subsets that consisted of either all populations, or only the eastern and southern (ES) populations. These were the **1)** *full-unlinked dataset*, **2)** *ES-unlinked dataset* and **3)** *ES dataset*.
-
-### Filtering for the *full-unlinked dataset*
-
-The *full-unlinked dataset* contained all 23 populations and was used for the phylogeny and population structure analyses. 
-
 Using ```VCFtools```, we first kept variants genotyped in 50% of individuals that have a minimum quality score of 30, and a minor allele count of 1.
 
 ```
@@ -138,7 +136,7 @@ vcftools --gzvcf all_joint.Q30mac1dp3.vcf.gz --missing-indv
 
 We graphed the distribution of missing data per individual in R.  
 
-![Alt text](missing_data_all.jpeg?raw=true "Title")
+![Alt text](~images/missing_data_all.jpeg?raw=true "Title")
 
 We removed the upper tail of the distribution, discarding all individuals with more than 40% missing data. This was achieved by first creating a list of individuals with >40% missing data. 
 
@@ -158,7 +156,7 @@ Sites with high coverage could be multi-copy regions of the genome, so we wanted
 vcftools --vcf all_joint.Q30mac1dp3ir.recode.vcf --site-mean-depth --out mean_depth
 ```
 
-![Alt text]( mean_read_depth_all.jpeg?raw=true "Title")
+![Alt text](~images/mean_read_depth_all.jpeg?raw=true "Title")
 
 In general, the mean read depth per locus should be approximately normally distributed. Within the literature, various approaches have been used to select the maximum mean read depth. For instance, Li (2014) suggests using the equation: **d+3*sqrt(d)**, d=mean depth (which is a value of 63 for our dataset). However, this method has been suggested as too conservative for RADseq data. Others use the 90th quantile (which is 88 for our data), two times the mode (40 for our data, after rounding the mean depths to the nearest 10), or, others just eyeball the mean depth distribution and remove the upper tail (~120 for our data). After examining these multiple approaches, we chose a maximum mean depth of 100. 
 
@@ -262,163 +260,137 @@ We filtered for an overall minor allele frequency of 0.05.
 ./plink --vcf all_rel_50pp_80md_HWE_ids_removed.vcf --maf 0.05 --export vcf --allow-extra-chr --out all_rel_50pp_80md_HWE_MAF0.05
 ```
 
-###Removal of selected loci for the *full-unlinked dataset*
+## Selection of unlinked SNPs
 
-We used ```PCAdapt``` to remove outliers across all populations. ```PCAdapt``` uses principal components analysis (PCA) to detect loci under selection. Because outliers will typically have large differences in allele frequencies between populations, they will be related to population structure and discriminate populations within a PCA. ```PCAdapt``` identifies these SNPs based upon a user defined (K) number of PC axes.
-
-We followed the ```PCAdapt``` tutorial, found here: https://bcm-uga.github.io/pcadapt/articles/pcadapt.html. Please refer to the tutorial for additional information. The following code was undertaken in R:
-
-The required libraries for running ```PCAdapt``` were loaded.
+In some datasets, only unlinked SNPs were used. To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to retain one SNP per 2000bp. 
 
 ```
-library(pcadapt)
-library(robustbase)
-library(qvalue)
+./plink --vcf all_rel_50pp_80md_HWE_MAF0.05_neutral.vcf --make-bed --bp-space 2000 --allow-extra-chr --vcf-half-call m  --export vcf --out all_rel_50pp_80md_HWE_MAF0.05_unlinked
 ```
 
-The path to the input file was defined.
+## The final datasets we used within our analyses are as follows:
+
+* All populations, MAF 0.05, unlinked SNPS: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
+* All populations, MAF 0.01: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz)
+* Western Australia populations removed, MAF 0.05: [ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz) (Note: these Western Australia populations were removed before filtering, when all populations were merged into one joint file)
+* Western Australia populations removed, MAF 0.05, unlinked SNPs: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
+* Western Australia populations removed, MAC 1: [ESC_rel_50pp_80md_HWE_MAC1.vcf.gz] (vcf_files/ ESC_rel_50pp_80md_HWE_MAC1.vcf.gz)
+
+# Do populations cluster by geography or by ecotype?
+
+We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with using the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py```  (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This [IQtree_renamed.counts] (IQ-TREE/ IQtree_renamed.counts) file summarises the allele frequencies for each population and is the input file to ```IQ-TREE```. 
 
 ```
-path_to_file <- "…/all_rel_50pp_80md_HWE_MAF0.05.vcf"
-```
-
-The VCF file was read as PCAdapt format. The code below also outputs the number of individuals and number of loci so you can check it has read the file correctly.
-
-```
-file <- read.pcadapt(path_to_file, type = "vcf")
-```
-
-A PCA was performed with K principal components. 
-
-```
-x <- pcadapt(input = file, K = 40)
-```
-
-We visualised how much variance each principal component explaines with a scree plot. 
-
-```
-plot(x, option = "screeplot")
-```
-
-![Alt text]( scree_plot_all.jpeg?raw=true "Title")
-
-The scree plot corresponds to the eigenvalues in decreasing order. The eigenvalues that correspond to random variation lie on the straight line whereas the ones that correspond to population structure lie on the curve. It is recommended to choose a K value that corresponds to where the curve meets the line. In our case, this is K=23 (which also corresponds to the number of populations with our study).
-
-We can also use an alternative method to choose K, which involves graphing the data onto different PC axes. When you observe a random scatter of points, the principal components do not provide any information about population structure. You should then choose K to equal the last PC that shows population structure.To do this, we first created a list of the population names (corresponding to the order of individuals in the input file) so each population can be plotted as a different colour.
-
-```
-poplist.names <- c(rep("D00", 62), rep("D01", 60), rep("D02", 62), rep("D03", 61), rep("D04", 62), rep("D05", 62), rep("D09", 63), rep("D12", 62), rep("D14", 12), rep("D32", 62), rep("D35", 62), rep("H00", 63), rep("H01", 58), rep("H02", 61), rep("H03", 63), rep("H04", 62), rep("H05", 62), rep("H06", 62), rep("H07", 60), rep("H12", 63), rep("H12A", 62), rep("H14", 62), rep("H15", 11))
-print(poplist.names)
-```
-
-We plotted the first two PC axes.
-
-```
-plot(x, option = "scores", i = 1, j = 2, pop = poplist.names)
-```
-
-![Alt text]( PC1_PC2_all.jpeg?raw=true "Title")
-
-
-As you can see, there is significant population structure here. Plots were created for ascending pairs of PCs, up until K=40. We found that there is longer no strong population structure at K=23/24.
-
-```
-plot(x, option = "scores", i = 23, j = 24, pop = poplist.names)
-```
-
-![Alt text]( PC23_PC24_all.jpeg?raw=true "Title")
-
-Based on these results, and those from the scree plot, we chose K=23.
-
-A PCA was performed on the genotype matrix, and a summary was produced.
-
-```
-x <- pcadapt(filename, K = 23)
-summary(x)
-```
-
-See https://bcm-uga.github.io/pcadapt/articles/pcadapt.html for various plot summaries of the data.
-
-For a given *a* (real valued number between 0 and 1), SNPs with q-values less than *a* will be considered as outliers with an expected false discovery rate bounded by *a*. The false discovery rate is defined as the percentage of false discoveries among the list of candidate SNPs. We chose a false discovery rate of 1%. 
-
-```
-qval <- qvalue(x$pvalues)$qvalues
-alpha <- 0.01 #1% false discovery rate
-```
-
-The outliers were extracted and sent to an output file.
-```
-all_outliers <- which(qval < alpha)
-all_outliers
-write(all_outliers, file = "all_outliers.txt",ncolumns = 1 ,append = FALSE, sep = "/t")
-```
-
-```get.pc``` summarises which PCs are the most correlated with each outlier SNP
-
-```
-snp_pc <- get.pc(x, all_outliers)
-```
-
-We then removed these outliers from the VCF file. When given a VCF file, ```PCAdapt``` records SNPs as numbers ascending from 1 (corresponding to their order in the input file). Therefore, the outliers from PCAdapt were numbers. We need to cross reference these numbers with the SNP IDs in the VCF file. We first extracted the ID column of the VCF file.
-
-```
-bcftools query -f ' %ID \n' all_rel_50pp_80md_HWE_MAF0.05.vcf > all_rel_50pp_80md_HWE_MAF0.05_IDs.txt
-```
-
-The text file was opened in excel, and in a new column, the numbers 1 onwards were added in an additional column. The list of outliers for were added to another column. VLOOKUP was used to find the corresponding SNP IDs for the SNP numbers. This file was saved as all_outliers_IDs.txt. We used ```PLINK``` to remove these outliers. 
-
-```
-./plink --vcf all_rel_50pp_80md_HWE_MAF0.05.vcf --exclude all_outliers_IDs.txt --export vcf --allow-extra-chr --out all_rel_50pp_80md_HWE_MAF0.05_neutral
-```
-
-### Selection of unlinked SNPs for the *full-unlinked dataset*
-
-To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to retain one SNP per 2000bp. 
-
-```
-./plink --vcf all_rel_50pp_80md_HWE_MAF0.05_neutral.vcf --make-bed --bp-space 2000 --allow-extra-chr --vcf-half-call m  --export vcf --out all_rel_50pp_80md_HWE_MAF0.05_neutral_unlinked
-```
-
-This was the final filtering step of the *full-unlinked dataset*, which was used to construct the phylogeny, and for the population structure analysis across all populations.
-
-
-### ES dataset
-...
-
-### ES-unlinked dataset
-...
-
-# Phylogeny
-
-We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with the *full-unlinked dataset* with the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py```  (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This counts file summarises the allele frequencies for each population.
-
-```
-FastaToCounts.py all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.fasta.gz all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.counts
+FastaToCounts.py all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.fasta.gz IQtree_renamed.counts
 ```
 
 We then used ```ModelFinder``` to determine the best-fit substitution model for the data. The D09 population from Western Australia was assigned as the outgroup. 
 
 ```
-iqtree -s all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.counts -m MF -o D09 -pre ModelFinder
+iqtree -s IQtree_renamed.counts -m MF -o D09 -pre ModelFinder
 ```
 
 *TVMe+FQ+P+N9+G4* was the best substitution model, and we increased the virtual population size (*N*) to maximum value of 19, as recommended by Schrempf et al. (2016). We then constructed the phylogeny. Branch support was performed using ```UFboot``` (10,000 replicates) and ```SH-aLRT``` (10,000 replicates).
 
 ```
-iqtree -s all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.counts -m TVMe+FQ+P+N19+G4 -o D09 -bb 10000 -alrt 10000 -pre run1
+iqtree -s IQtree_renamed.counts -m TVMe+FQ+P+N19+G4 -o D09 -bb 10000 -alrt 10000 -pre run1
 ```
 
 To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
 
+
+We then used ```fastSTRUCTURE``` to explore population structure across all populations. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used ```PGDspider``` as well as manipulations in excel to convert the VCF file into ```fastSTRUCTURE``` format, see [fastSTRUCTURE.str] (fastSTRUCTURE/fastSTRUCTURE.str). We ran the simple prior (K=1-30) with 100 independent runs per K-value. ```choosek.py``` (https://github.com/rajanil/fastStructure/blob/master/chooseK.py) was used to choose the most likely number of genetic clusters. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html 
+
+# Has gene flow shaped patterns of divergence across the system?
+
+We used ```TreeMix``` to explore patterns of gene flow in a phylogenetic context. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz). To convert this VCF file into the ```TreeMix``` format, we used ```PLINK``` to make bed, bim and fam files. 
+
+```
+./plink --vcf all_rel_50pp_80md_HWE_MAF0.01.vcf --allow-extra-chr --make-bed --out all_rel_50pp_80md_HWE_MAF0.01
+```
+
+This was converted to a frequency file.
+
+```
+./plink --bfile all_rel_50pp_80md_HWE_MAF0.01 --allow-extra-chr --freq --missing --within all_MAF0.01.clusters.txt
+```
+
+[all_MAF0.01.clusters.txt](TreeMix/all_MAF0.01.clusters.txt) specifies the individuals in the first two columns, and the population code in the third column (in the order of the VCF file). The output file from above was zipped. 
+
+```
+gzip plink.frq.strat
+```
+
+The ```plink2treemix.py``` (https://github.com/ekirving/ctvt/blob/master/plink2treemix.py) script was used to convert the zipped file into ```TreeMix``` format, which was used as the input file: [TreeMix.frq.gz](TreeMix/TreeMix.frq.gz) 
+
+```
+python plink2treemix.py plink.frq.strat.gz TreeMix.frq.gz
+```
+
+We constructed an initial 25 maximum likelihood trees with no migration, 1,000 bootstrap replicates in blocks of 50 SNPs with D09 as the assigned outgroup. For instance, for one replicate:
+
+```
+treemix -i TreeMix.frq.gz -bootstrap 1000 -k 50 -root D09 -m 0 -o TreeMix_m0_1
+```
+
+We selected the tree with the highest log-likelihood (which was replicate no. 19) as the input tree for all subsequent analyses. We then tested between 1-25 migration events in blocks of 50 SNPs. For instance, for one migration event:
+
+```
+treemix -i TreeMix.frq.gz -g TreeMix_m0_19.vertices.gz TreeMix_m0_19.edges.gz -k 50 -m 1 -o TreeMix_m1
+```
+
+To select the number of migration events, we examined the log-likelihoods and cumulative variance explained by each model by extracting the log likelihood and variance from each of the 25 migration events and plotting the distribution in R. WE also performed jackknife estimates to obtain the standard error and significance of the weight of each migration event. 
+
+```
+treemix -i 1 TreeMix.frq.gz -g TreeMix_m0_19.vertices.gz 1 TreeMix _m0_19.edges.gz -se -m 25 -o TreeMix_jackknife_m25
+```
+
+We also more formally tested for genetic admixture, we calculated *f3* in ```TreeMix``` for all triads of populations with jackknifing in blocks of 50 SNPs.
+
+```
+threepop -i TreeMix.frq.gz -g TreeMix _m0_19.vertices.gz TreeMix_m0_19.edges.gz -k 50
+```
+
+We then tested for isolation by distance (IBD) using migration rates inferred from ```fastsimcoal2``` (see below for details), as well as Slatkin’s M. For ```fastsimcoal2``` we tested for IBD between the Dune and Headland ecotypes at each locality. See [IBD_fsc.txt] (IBD/IBD_fsc.txt) for input file. We performed a linear model in R using the average gene flow rate between the Dune and Headland at each locality.
+
+```
+IBD_fsc <- read.delim ("path/to/file/IBD_fsc.txt", header=T)
+summary(lm(GFavrg~GeodistLOGkm, data=IBD_fsc))
+```
+
+For Slatkin’s M, we used the dataset: [ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz). We calculated pairwise F<sub>ST</sub> in ```VCFtools```, for instance, for population D00 and D01:
+
+```
+vcftools --vcf ESC_rel_50pp_80md_HWE_MAF0.05.vcf --weir-fst-pop pops/D00.txt --weir-fst-pop pops/D01.txt --out D00-D01
+```
+
+Where D00.txt and D01.txt are files specifying the individuals within each population. We calculated Slatkin’s M using the formula: (1 / F<sub>ST</sub> - 1) / 4
+
+Using Slatkin’s M, we tested for IBD within the Dunes and also within the Headlands using Mantel tests in R. See [Dgendist.txt] (IBD/Dgendist.txt) for the Dune matrix of pairwise genetic distances (log-scale), [Dgeodist.txt] (IBD/Dgeodist.txt) for the Dune matrix of pairwise geographic distances (log-scale), [Hgendist.txt] (IBD/Hgendist.txt)for Headland genetic distances, and [Hgeodist.txt] (IBD/Hgeodist.txt) for Headland geographic distances. For instance, for the Dunes in R: 
+
+```
+library(vegan)
+Dgen<- read.delim ("path/to/file/Dgendist.txt", header=F)
+Dgeo<- read.delim ("path/to/file/Dgeodist.txt", header=F)
+DgenM <- as.dist(Dgen)
+DgeoM <- as.dist(Dgeo)
+#mantel test
+mantel(DgeoM, DgenM, permutations = 9999)
+```
+
+We also performed a linear model in R using the average gene flow rate between the Dune and Headland at each locality. See [IBD_sm.txt] (IBD/IBD_sm.txt) for input file.
+
+```
+IBD_sm <- read.delim ("path/to/file/IBD_sm.txt", header=T)
+summary(lm(FstSkMeanLOG~GeodistLOGkm, data=IBD_sm))
+```
+
 # Is there gene flow between parapatric populations?
 
-
-```STRUCTURE``` was used to estimate levels of admixture between ecotypes at each locality. See [structure](STRUCTURE_input) for all input files as well as example ```mainparams``` and ```extraparams``` files. 
-
+```STRUCTURE``` was used to estimate levels of admixture between ecotypes at each locality. We used the dataset: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We then extracted each population pair and removed SNPs with MAF < 0.05 per pair and used ```PGDspider``` to convert each VCF file into ```STRUCTURE``` format. ```STRUCTURE``` was run using the admixture model and the correlated allele frequency model with 10 independent runs for K=1-6 (50,000 burn-in and 200,000 MCMC iterations). See [STRUCTURE] (STRUCTURE) for all input files as well as example ```mainparams``` and ```extraparams``` files. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html
 
 
 # Gene flow detection with fastsimcoal
-
 
 ```fastsimcoal``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
 
