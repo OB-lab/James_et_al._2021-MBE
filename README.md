@@ -271,14 +271,14 @@ In some datasets, only unlinked SNPs were used. To obtain unlinked SNPs (~one SN
 ## The final datasets we used within our analyses are as follows:
 
 * All populations, MAF 0.05, unlinked SNPS: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
-* All populations, MAF 0.01: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz)
+* All populations, MAF 0.01: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz](vcf_files/all_rel_50pp_80md_HWE_MAF0.01.vcf.gz)
 * Western Australia populations removed, MAF 0.05: [ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz) (Note: these Western Australia populations were removed before filtering, when all populations were merged into one joint file)
 * Western Australia populations removed, MAF 0.05, unlinked SNPs: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
-* Western Australia populations removed, MAC 1: [ESC_rel_50pp_80md_HWE_MAC1.vcf.gz](vcf_files/ ESC_rel_50pp_80md_HWE_MAC1.vcf.gz)
+* Western Australia populations removed, MAC 1: [ESC_rel_50pp_80md_HWE_MAC1.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAC1.vcf.gz)
 
 # Do populations cluster by geography or by ecotype?
 
-We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with using the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py``` (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This [IQtree_renamed.counts](IQ-TREE/ IQtree_renamed.counts) file summarises the allele frequencies for each population and is the input file to ```IQ-TREE```. 
+We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with using the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py``` (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This [IQtree_renamed.counts](IQ-TREE/IQtree_renamed.counts) file summarises the allele frequencies for each population and is the input file to ```IQ-TREE```. 
 
 ```
 FastaToCounts.py all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.fasta.gz IQtree_renamed.counts
@@ -299,11 +299,11 @@ iqtree -s IQtree_renamed.counts -m TVMe+FQ+P+N19+G4 -o D09 -bb 10000 -alrt 10000
 To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
 
 
-We then used ```fastSTRUCTURE``` to explore population structure across all populations. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used ```PGDspider``` as well as manipulations in excel to convert the VCF file into ```fastSTRUCTURE``` format, see [fastSTRUCTURE.str](fastSTRUCTURE/fastSTRUCTURE.str). We ran the simple prior (K=1-30) with 100 independent runs per K-value. ```choosek.py``` (https://github.com/rajanil/fastStructure/blob/master/chooseK.py) was used to choose the most likely number of genetic clusters. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html 
+We then used ```fastSTRUCTURE``` to explore population structure across all populations. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used ```PGDspider``` as well as manipulations in excel to convert the VCF file into ```fastSTRUCTURE``` format, see [fastSTRUCTURE.str](fastSTRUCTURE/fastSTRUCTURE.str). We ran the simple prior (K=1-30) with 100 independent runs per K-value. ```choosek.py``` (https://github.com/rajanil/fastStructure/blob/master/chooseK.py) was used to choose the most likely number of genetic clusters. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html 
 
 # Has gene flow shaped patterns of divergence across the system?
 
-We used ```TreeMix``` to explore patterns of gene flow in a phylogenetic context. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz). To convert this VCF file into the ```TreeMix``` format, we used ```PLINK``` to make bed, bim and fam files. 
+We used ```TreeMix``` to explore patterns of gene flow in a phylogenetic context. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz](vcf_files/all_rel_50pp_80md_HWE_MAF0.01.vcf.gz). To convert this VCF file into the ```TreeMix``` format, we used ```PLINK``` to make bed, bim and fam files. 
 
 ```
 ./plink --vcf all_rel_50pp_80md_HWE_MAF0.01.vcf --allow-extra-chr --make-bed --out all_rel_50pp_80md_HWE_MAF0.01
@@ -756,11 +756,3 @@ groupwiseMean(Vi ~ 1,
 ```
 
 Where ```Vi``` corresponds to the column name of the parameter of interest (*i.e.* V1 for ancestral size) and ```Table``` corresponds to the matrix containing the parameter values of all the replicates. 
-
-
-# TreeMix
-
-
-
-
-
