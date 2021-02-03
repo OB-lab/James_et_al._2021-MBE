@@ -1,6 +1,6 @@
 
 This repository contains step-by-step instructions, code and data for:
-James ME, Arenas-Castro H, Groh JS, Engelstaedter J and Ortiz-Barrientos D. (2020) Highly replicated evolution of parapatric ecotypes [journal] [volume.page] [doi]
+*James ME, Arenas-Castro H, Groh JS, Engelstaedter J and Ortiz-Barrientos D. (2020) Highly replicated evolution of parapatric ecotypes [journal] [volume.page] [doi]*
 
 # DNA extraction and Genotyping-by-Sequencing
 
