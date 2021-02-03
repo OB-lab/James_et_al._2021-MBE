@@ -4,7 +4,7 @@ James ME, Arenas-Castro H, Groh JS, Engelstaedter J and Ortiz-Barrientos D. (202
 
 # DNA extraction and Genotyping-by-Sequencing
 
-See [CTAB_protocol] (laboratory/CTAB_protocol.doc) for the CTAB DNA extraction protocol, and [GBS_protocol] (laboratory/GBS_protocol.doc) for the Genotyping-by-Sequencing protocol.
+See [CTAB_protocol](laboratory/CTAB_protocol.doc) for the CTAB DNA extraction protocol, and [GBS_protocol](laboratory/GBS_protocol.doc) for the Genotyping-by-Sequencing protocol.
 
 # Bioinformatics
 
@@ -270,15 +270,15 @@ In some datasets, only unlinked SNPs were used. To obtain unlinked SNPs (~one SN
 
 ## The final datasets we used within our analyses are as follows:
 
-* All populations, MAF 0.05, unlinked SNPS: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
-* All populations, MAF 0.01: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz)
+* All populations, MAF 0.05, unlinked SNPS: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
+* All populations, MAF 0.01: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz)
 * Western Australia populations removed, MAF 0.05: [ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05.vcf.gz) (Note: these Western Australia populations were removed before filtering, when all populations were merged into one joint file)
-* Western Australia populations removed, MAF 0.05, unlinked SNPs: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
-* Western Australia populations removed, MAC 1: [ESC_rel_50pp_80md_HWE_MAC1.vcf.gz] (vcf_files/ ESC_rel_50pp_80md_HWE_MAC1.vcf.gz)
+* Western Australia populations removed, MAF 0.05, unlinked SNPs: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz)
+* Western Australia populations removed, MAC 1: [ESC_rel_50pp_80md_HWE_MAC1.vcf.gz](vcf_files/ ESC_rel_50pp_80md_HWE_MAC1.vcf.gz)
 
 # Do populations cluster by geography or by ecotype?
 
-We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with using the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py```  (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This [IQtree_renamed.counts] (IQ-TREE/ IQtree_renamed.counts) file summarises the allele frequencies for each population and is the input file to ```IQ-TREE```. 
+We used ```IQ-TREE``` to generate a maximum likelihood phylogeny with using the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used the polymorphisms-aware phylogenetic model. We first used ```PGDspider``` to convert the VCF file to a fasta file. ```FastaToCounts.py``` (https://github.com/pomo-dev/PoMo/blob/master/scripts/FastaToCounts.py) was then used to convert the fasta file to a counts file. This [IQtree_renamed.counts](IQ-TREE/ IQtree_renamed.counts) file summarises the allele frequencies for each population and is the input file to ```IQ-TREE```. 
 
 ```
 FastaToCounts.py all_rel_50pp_80md_HWE_MAF0.05_unlinked_renamed.fasta.gz IQtree_renamed.counts
@@ -299,11 +299,11 @@ iqtree -s IQtree_renamed.counts -m TVMe+FQ+P+N19+G4 -o D09 -bb 10000 -alrt 10000
 To assess convergence, we undertook 10 separate runs of above ```IQ-TREE``` code and examined tree topology (which remained unchanged with 10 independent runs). We also ensured that the log-likelihood values were stable at the end of each run. 
 
 
-We then used ```fastSTRUCTURE``` to explore population structure across all populations. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used ```PGDspider``` as well as manipulations in excel to convert the VCF file into ```fastSTRUCTURE``` format, see [fastSTRUCTURE.str] (fastSTRUCTURE/fastSTRUCTURE.str). We ran the simple prior (K=1-30) with 100 independent runs per K-value. ```choosek.py``` (https://github.com/rajanil/fastStructure/blob/master/chooseK.py) was used to choose the most likely number of genetic clusters. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html 
+We then used ```fastSTRUCTURE``` to explore population structure across all populations. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We used ```PGDspider``` as well as manipulations in excel to convert the VCF file into ```fastSTRUCTURE``` format, see [fastSTRUCTURE.str](fastSTRUCTURE/fastSTRUCTURE.str). We ran the simple prior (K=1-30) with 100 independent runs per K-value. ```choosek.py``` (https://github.com/rajanil/fastStructure/blob/master/chooseK.py) was used to choose the most likely number of genetic clusters. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html 
 
 # Has gene flow shaped patterns of divergence across the system?
 
-We used ```TreeMix``` to explore patterns of gene flow in a phylogenetic context. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz] (vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz). To convert this VCF file into the ```TreeMix``` format, we used ```PLINK``` to make bed, bim and fam files. 
+We used ```TreeMix``` to explore patterns of gene flow in a phylogenetic context. We used the dataset: [all_rel_50pp_80md_HWE_MAF0.01.vcf.gz](vcf_files/ all_rel_50pp_80md_HWE_MAF0.01.vcf.gz). To convert this VCF file into the ```TreeMix``` format, we used ```PLINK``` to make bed, bim and fam files. 
 
 ```
 ./plink --vcf all_rel_50pp_80md_HWE_MAF0.01.vcf --allow-extra-chr --make-bed --out all_rel_50pp_80md_HWE_MAF0.01
@@ -339,7 +339,7 @@ We selected the tree with the highest log-likelihood (which was replicate no. 19
 treemix -i TreeMix.frq.gz -g TreeMix_m0_19.vertices.gz TreeMix_m0_19.edges.gz -k 50 -m 1 -o TreeMix_m1
 ```
 
-To select the number of migration events, we examined the log-likelihoods and cumulative variance explained by each model by extracting the log likelihood and variance from each of the 25 migration events and plotting the distribution in R. WE also performed jackknife estimates to obtain the standard error and significance of the weight of each migration event. 
+To select the number of migration events, we examined the log-likelihoods and cumulative variance explained by each model by extracting the log likelihood and variance from each of the 25 migration events and plotting the distribution in R. We also performed jackknife estimates to obtain the standard error and significance of the weight of each migration event. 
 
 ```
 treemix -i 1 TreeMix.frq.gz -g TreeMix_m0_19.vertices.gz 1 TreeMix _m0_19.edges.gz -se -m 25 -o TreeMix_jackknife_m25
@@ -351,7 +351,7 @@ We also more formally tested for genetic admixture, we calculated *f3* in ```Tre
 threepop -i TreeMix.frq.gz -g TreeMix _m0_19.vertices.gz TreeMix_m0_19.edges.gz -k 50
 ```
 
-We then tested for isolation by distance (IBD) using migration rates inferred from ```fastsimcoal2``` (see below for details), as well as Slatkin’s M. For ```fastsimcoal2``` we tested for IBD between the Dune and Headland ecotypes at each locality. See [IBD_fsc.txt] (IBD/IBD_fsc.txt) for input file. We performed a linear model in R using the average gene flow rate between the Dune and Headland at each locality.
+We then tested for isolation by distance (IBD) using migration rates inferred from ```fastsimcoal2``` (see below for details), as well as Slatkin’s M. For ```fastsimcoal2``` we tested for IBD between the Dune and Headland ecotypes at each locality. See [IBD_fsc.txt](IBD/IBD_fsc.txt) for input file. We performed a linear model in R using the average gene flow rate between the Dune and Headland at each locality.
 
 ```
 IBD_fsc <- read.delim ("path/to/file/IBD_fsc.txt", header=T)
@@ -366,7 +366,7 @@ vcftools --vcf ESC_rel_50pp_80md_HWE_MAF0.05.vcf --weir-fst-pop pops/D00.txt --w
 
 Where D00.txt and D01.txt are files specifying the individuals within each population. We calculated Slatkin’s M using the formula: (1 / F<sub>ST</sub> - 1) / 4
 
-Using Slatkin’s M, we tested for IBD within the Dunes and also within the Headlands using Mantel tests in R. See [Dgendist.txt] (IBD/Dgendist.txt) for the Dune matrix of pairwise genetic distances (log-scale), [Dgeodist.txt] (IBD/Dgeodist.txt) for the Dune matrix of pairwise geographic distances (log-scale), [Hgendist.txt] (IBD/Hgendist.txt)for Headland genetic distances, and [Hgeodist.txt] (IBD/Hgeodist.txt) for Headland geographic distances. For instance, for the Dunes in R: 
+Using Slatkin’s M, we tested for IBD within the Dunes and also within the Headlands using Mantel tests in R. See [Dgendist.txt](IBD/Dgendist.txt) for the Dune matrix of pairwise genetic distances (log-scale), [Dgeodist.txt](IBD/Dgeodist.txt) for the Dune matrix of pairwise geographic distances (log-scale), [Hgendist.txt](IBD/Hgendist.txt)for Headland genetic distances, and [Hgeodist.txt](IBD/Hgeodist.txt) for Headland geographic distances. For instance, for the Dunes in R: 
 
 ```
 library(vegan)
@@ -378,7 +378,7 @@ DgeoM <- as.dist(Dgeo)
 mantel(DgeoM, DgenM, permutations = 9999)
 ```
 
-We also performed a linear model in R using the average gene flow rate between the Dune and Headland at each locality. See [IBD_sm.txt] (IBD/IBD_sm.txt) for input file.
+We also performed a linear model in R using the average gene flow rate between the Dune and Headland at each locality. See [IBD_sm.txt](IBD/IBD_sm.txt) for input file.
 
 ```
 IBD_sm <- read.delim ("path/to/file/IBD_sm.txt", header=T)
@@ -387,7 +387,7 @@ summary(lm(FstSkMeanLOG~GeodistLOGkm, data=IBD_sm))
 
 # Is there gene flow between parapatric populations?
 
-```STRUCTURE``` was used to estimate levels of admixture between ecotypes at each locality. We used the dataset: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz] (vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We then extracted each population pair and removed SNPs with MAF < 0.05 per pair and used ```PGDspider``` to convert each VCF file into ```STRUCTURE``` format. ```STRUCTURE``` was run using the admixture model and the correlated allele frequency model with 10 independent runs for K=1-6 (50,000 burn-in and 200,000 MCMC iterations). See [STRUCTURE] (STRUCTURE) for all input files as well as example ```mainparams``` and ```extraparams``` files. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html
+```STRUCTURE``` was used to estimate levels of admixture between ecotypes at each locality. We used the dataset: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We then extracted each population pair and removed SNPs with MAF < 0.05 per pair and used ```PGDspider``` to convert each VCF file into ```STRUCTURE``` format. ```STRUCTURE``` was run using the admixture model and the correlated allele frequency model with 10 independent runs for K=1-6 (50,000 burn-in and 200,000 MCMC iterations). See [STRUCTURE](STRUCTURE) for all input files as well as example ```mainparams``` and ```extraparams``` files. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html
 
 
 # Gene flow detection with fastsimcoal
