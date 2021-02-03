@@ -265,7 +265,7 @@ We filtered for an overall minor allele frequency of 0.05.
 In some datasets, only unlinked SNPs were used. To obtain unlinked SNPs (~one SNP per rad tag), we used ```PLINK``` to retain one SNP per 2000bp. 
 
 ```
-./plink --vcf all_rel_50pp_80md_HWE_MAF0.05_neutral.vcf --make-bed --bp-space 2000 --allow-extra-chr --vcf-half-call m  --export vcf --out all_rel_50pp_80md_HWE_MAF0.05_unlinked
+./plink --vcf all_rel_50pp_80md_HWE_MAF0.05.vcf --make-bed --bp-space 2000 --allow-extra-chr --vcf-half-call m  --export vcf --out all_rel_50pp_80md_HWE_MAF0.05_unlinked
 ```
 
 ## The final datasets we used within our analyses are as follows:
