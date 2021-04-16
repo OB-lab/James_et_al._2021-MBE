@@ -441,17 +441,17 @@ The *template* file specifies the evolutionary model and the parameters that sho
 
   + Number of populations.
   
-  + Population effective sizes: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated (*i.e. NPOP1, NPOP2*). For diploid species, it corresponds to twice the number of individuals. The order of the populations in this file should be the same as in the SFS file, which usually is alphabetically sorted based on the population names. The program indexes the first population as 0, the second one as 1, and so on.
+  + Population effective sizes: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated. The population in the first line should correspond to the columns in the SFS file and the population in the second line to the one in the rows of the SFS file. The order of the populations in the SFS file is alphabetically sorted based on the population names. The program indexes the first population as 0 and the second one as 1.
   
-  + Sample sizes: It should contain one line per population and follow the population order specified in the previous section. Sizes should be given in haploid numbers. It corresponds to the number of projections used in ```easySFS``` for downsampling.
+  + Sample sizes: It should contain one line per population in the order specified in the previous section.
   
   + Growth rates: It should contain one line per population. A zero growth rate means stationary population size. Negative growth implies population expansion since it is estimated backward in time.
   
   + Number of migration matrixes.
   
-  + Migration matrix: It should contain one matrix per migration matrix, as mentioned in the previous section. The program indexes the first migration matrix as 0, the second one as 1, and so on. A cell value in the migration matrix is read as the probability that a haploid individual migrates from the population specified in the row to the population specified in the column. If the migration rate is unknown, a parameter name should be specified instead in the corresponding cell to be calculated (*i.e.* MIG12, MIG21).
+  + Migration matrix: It should contain one matrix per migration matrix, as mentioned in the previous section. The program indexes the first migration matrix as 0, the second one as 1, and so on. A cell value in the migration matrix is read as the probability that a haploid individual migrates backward in time from the population specified in the row to the population specified in the column. If the migration rate is unknown, a parameter name should be specified instead in the corresponding cell to be calculated.
   
-  + Historical events: This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottlenecks, admixture events, coalescence of populations, etc. Each historical event should be specified in a different line and be defined by 7 numbers in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated (*i.e. TDIV, RESIZE*).
+  + Historical events: This section is the heart of the evolutionary model. The first line specifies the number of historical events, namely gene flow, bottlenecks, admixture events, coalescence of populations, etc. Each historical event should be specified in a different line and be defined by 7 parameters in the following order. If any of those values are unknown, a parameter name should be specified instead to be calculated.
     
     - Number of generations in the past at which the historical event happened.
     - Source population.
@@ -469,35 +469,25 @@ The *template* file specifies the evolutionary model and the parameters that sho
   
 Every section is introduced by a comment line starting with the characters ```//```. The name of the *template* file must be the root name of the SFS file plus the extention *.tpl*. For instance, the corresponding *template* file name of *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.tpl*.
 
-For the Dune-Headland pairs, we considered seven demographic models ranging from no migration, free migration, and migration after secondary contact. Sample template files for the *D00-H00* pair are in the directory ```TemplateFiles/Pair```. Beware file names were modified to distinguish among models here. They assume the Dune population comes first in the SFS file.
-
-  + Model 1: No migration.
-  + Model 2: Bidirectional migration.
-  + Model 3: Headland to Dune migration.
-  + Model 4: Dune to Headland migration.
-  + Model 5: Bidirectional migration after secondary contact.
-  + Model 6: Headland to Dune migration after secondary contact.
-  + Model 7: Dune to Headland migration after secondary contact.
-
-This is how a template file for model 5 of a population pair looks like:
+This is how a template file looks like:
 
 ```
-// Two populations - D00_H00 - M5 Bidirectional secondary contact
+// Two populations - M5 Bidirectional secondary contact
 2
-//Population effective sizes: to be estimated
-NPOP1
-NPOP2
+//Population effective sizes: to be estimated.
+HEAD
+DUNE
 //Samples haploid size: the same one defined in the projections. 
-48
-54
+126
+124
 //Growth rates: negative growth implies population expansion
 0
 0
 //Number of migration matrices : 0 implies no migration between demes
 2
-//Migration matrix 0: to be estimated
-0 MIG12
-MIG21 0
+//Migration matrix 0: to be estimated.
+0 H2D
+D2H 0
 //Migration matrix 1
 0 0
 0 0
@@ -513,60 +503,7 @@ TSEC 0 1 0 1 0 1
 FREQ 1 0 1e-8
 ```
 
-In this file, *NPOP1*, *NPOP2*, *MIG21*, *MIG12*, *TDIV*, *RESIZE*, and *TSEC* are the unknown parameters to be estimated by ```fastsimcoal```. They also be specified in the corresponding *estimation* file.
-
-For the population triads, we considered a nested-model approach because the number of possible demographic models considerably increases with more than two populations. Nine initial models, ranging from no migration to bidirectional migration among all populations, are first fitted to the data and then different nested variants of the best model are explored, such as unidirectional migration or migration after secondary contact.
-
-  + Model 1: No migration. 
-  + Model 2: Bidirectional migration between A and B.
-  + Model 3: Bidirectional migration between A and C.
-  + Model 4: Bidirectional migration between B and C.
-  + Model 5: Bidirectional migration between A and B & A and C.
-  + Model 6: Bidirectional migration between A and B & B and C.
-  + Model 7: Bidirectional migration between A and C & B and C.
-  + Model 8: Bidirectional migration among all populations.
-  + Model 9: Bidirectional migration between the A-B ancestor and C.
-
-Beware that, contrary to the population pairs case, the template files of the same model vary from one triad to another and they should be carefully inspected case by case. This is not an issue when working with population pairs because the Dune population always comes first in the SFS file and the Headland population comes second and the phylogenetic relationships among populations are the same regardless their order.  Sample template files for the *D32-H12-H12A* triad are in the directory ```TemplateFiles/Triad```. Beware file names were modified to distinguish among models here.
-
-This is how a template file for a population triad looks like:
-
-```
-// Three populations: D32_H12_H12A - M8 Bidirectional migration all combinations
-3
-//Population effective sizes: to be estimated.
-D32
-H12
-HA12
-//Samples haploid size: the same one defined in the projections. 
-64
-62
-64
-//Growth rates: negative growth implies population expansion
-0
-0
-0
-//Number of migration matrices : 0 implies no migration between demes
-2
-//Migration matrix 0
-0 MIG12 MIG13
-MIG21 0 MIG23
-MIG31 MIG32 0
-//Migration matrix 1
-0 0 0
-0 0 0
-0 0 0
-//historical event: time, source, sink, migrants, new deme size, growth rate, migr mat index
-2 historical event
-TDIV1 2 0 1 RESIZE1 0 1
-TDIV2 1 0 1 RESIZE2 0 1
-//Number of independent loci [chromosome] 
-1 0
-//Per chromosome: Number of contiguous linkage Block: a block is a set of contiguous loci
-1
-//per Block:data type, number of loci, per gen recomb and mut rates
-FREQ 1 0 1e-8
-```
+In this file, *HEAD*, *DUNE*, *H2D*, *D2H*, *TDIV*, *RESIZE*, and *TSEC* are the unknown parameters to be estimated by ```fastsimcoal2```. They should be specified in the corresponding *estimation* file as well.
 
 ## Getting the estimation file
 
