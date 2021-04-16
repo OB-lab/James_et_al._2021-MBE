@@ -390,32 +390,34 @@ summary(lm(FstSkMeanLOG~GeodistLOGkm, data=IBD_sm))
 ```STRUCTURE``` was used to estimate levels of admixture between ecotypes at each locality. We used the dataset: [ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz](vcf_files/ESC_rel_50pp_80md_HWE_MAF0.05_unlinked.vcf.gz). We then extracted each population pair and removed SNPs with MAF < 0.05 per pair and used ```PGDspider``` to convert each VCF file into ```STRUCTURE``` format. ```STRUCTURE``` was run using the admixture model and the correlated allele frequency model with 10 independent runs for K=1-6 (50,000 burn-in and 200,000 MCMC iterations). See [STRUCTURE](STRUCTURE) for all input files as well as example ```mainparams``` and ```extraparams``` files. Results were summarized and plotted in the R package ```pophelper```, by following the tutorial here: http://www.royfrancis.com/pophelper/articles/index.html
 
 
-# Gene flow detection with fastsimcoal
+# Gene flow detection with fastsimcoal2
 
-```fastsimcoal``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. We tested 10 demographic models (see below) in 30 population pairs of interest given their ecology, phylogenetic relationships, and occurrence patterns:
+```fastsimcoal2``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. 
+
+We use ```fastsimcoal2``` to test 10 demographic models (see below) in 30 population pairs of interest given their ecology, phylogenetic relationships, and occurrence patterns:
 
   + Dune-Headland pairs: D00-H00, D01-H01, D03-H02, D04-H05, D05-H06, D12-H14, D14-H15, D32-H12.
   + Dune-Dune pairs: D00-D02, D01-D03, D01-D04, D02-D03, D04-D05, D05-D12, D12-D14, D14-D32.
   + Headland-Headland pairs: H00-H02, H01-H04, H01-H05, H02-H04, H03-H07, H03-H14, H05-H06, H06-H07, H12-H12A, H12-H15, H14-H15.
   + Allopatric pairs: D03-D32, D03-H12, H02-H12.
 
-```fastsimcoal``` requires three input files to run each model:
+To run each model, ```fastsimcoal2``` requires three input files:
 
   + A site frequency spectrum file.
   + A *template* file.
   + An *estimation* file.
 
-All the ```fastsimcoal``` input files used in this study are available at [James_et_al._2021-MBE-fastsimcoal2_files.zip](fastsimcoal2/James_et_al._2021-MBE-fastsimcoal2_files.zip)
+All the ```fastsimcoal2``` input files used in this study are available at [James_et_al._2021-MBE-fastsimcoal2_files.zip](fastsimcoal2/James_et_al._2021-MBE-fastsimcoal2_files.zip)
 
-Please note that the header of the template file for models 3, 4, 6, and 7 makes reference to the migration pattern backward in time whereas in the paper both model names and migration rates are presented forward in time. Also, population 1 and population 2 follow the order assigned in the population pair name. For instance, for the population pair D00-H00, D00 is refered here as population 1 and H00 as population 2. Population 1 corresponds to the rows of the SFS file and is labeled as DUNE in the template and estimation files. Population 2 corresponds to the columns of the SFS file and is labeled as HEAD in the template and estimation files.
+Please note that the header of the template file for models 3, 4, 6, and 7 makes reference to the migration direction backward in time whereas in the paper both the name of the models and migration rates are presented forward in time. Also, population 1 and population 2 follow the order assigned in the population pair name. For instance, for the population pair D00-H00, D00 is refered here as population 1 and H00 as population 2. Population 1 corresponds to the rows of the SFS file and is labeled as DUNE in the template and estimation files. Population 2 corresponds to the columns of the SFS file and is labeled as HEAD in the template and estimation files. All sample and population sizes are in haploid numbers.
 
 ## Getting the site frequency spectrum (SFS) file
 
-The SFS is a summary of genome-wide data describing the distribution of allele frequencies in a sample of one or more populations. For instance, it tells how many SNPs are derived in only one chromosome, two chromosomes, three chromosomes, and so on in the population. Its shape is influenced by the history of the population: migration, population size changes, substructure, etc. The SFS treats all SNPs in the data set as independent of one another. Here, as well as in all ```fastsimcoal```-related files, sample and population sizes are counted in haploid numbers.
+The SFS is a summary of genome-wide data describing the distribution of allele frequencies in a sample of one or more populations. For instance, it tells how many SNPs are derived in only one chromosome, two chromosomes, three chromosomes, and so on in the population. Its shape is influenced by the history of the population: migration, population size changes, substructure, etc. The SFS treats all SNPs in the data set as independent of one another. 
 
 A SFS is referred as *folded* when the information about the ancestral/derived state of the SNP is unavailable. Instead, the minor allele frequency is used as criterion for assigning an ancestral/derived-like state. A SFS is referred as *joint* when it summarises information from two or more populations. 
 
-Since the SFS strictly only considers SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data should be downsampled to the number of chromosomes (haploid samples) that maximises the number of SNPs without missing data. The amount of missing data heavily relies on the quality of the sequence (sequencing depth).
+Since the SFS strictly only considers SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data can be downsampled to the number of chromosomes (haploid samples) that maximises the number of SNPs without missing data. The amount of missing data heavily relies on the quality of the sequence (sequencing depth).
 
 ```easySFS``` is a Python script (available at <https://github.com/isaacovercast/easySFS>) that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file can be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
 
