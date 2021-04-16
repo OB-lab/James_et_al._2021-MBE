@@ -409,7 +409,9 @@ To run each model, ```fastsimcoal2``` requires three input files:
 
 All the ```fastsimcoal2``` input files used in this study are available at [James_et_al._2021-MBE-fastsimcoal2_files.zip](fastsimcoal2/James_et_al._2021-MBE-fastsimcoal2_files.zip)
 
-Please note that the header of the template file for models 3, 4, 6, and 7 makes reference to the migration direction backward in time whereas in the paper both the name of the models and migration rates are presented forward in time. Also, population 1 and population 2 follow the order assigned in the population pair name. For instance, for the population pair D00-H00, D00 is refered here as population 1 and H00 as population 2. Population 1 corresponds to the rows of the SFS file and is labeled as DUNE in the template and estimation files. Population 2 corresponds to the columns of the SFS file and is labeled as HEAD in the template and estimation files. All sample and population sizes are in haploid numbers.
+Please note that the header of the template file for models 3, 4, 6, and 7 makes reference to the migration direction backward in time whereas in the paper both the name of the models and migration rates are presented forward in time. Also, population 1 and population 2 follow the order assigned in the population pair name. For instance, for the population pair D00-H00, D00 is refered here as population 1 and H00 as population 2. Population 1 corresponds to the rows of the SFS file and is labeled as DUNE in the template and estimation files. Population 2 corresponds to the columns of the SFS file and is labeled as HEAD in the template and estimation files. Both sample and population sizes are in haploid numbers. 
+
+The rest of this document names the files and command arguments using population pair D00-H00 as an example.
 
 ## Getting the site frequency spectrum (SFS) file
 
@@ -417,40 +419,21 @@ The SFS is a summary of genome-wide data describing the distribution of allele f
 
 A SFS is referred as *folded* when the information about the ancestral/derived state of the SNP is unavailable. Instead, the minor allele frequency is used as criterion for assigning an ancestral/derived-like state. A SFS is referred as *joint* when it summarises information from two or more populations. 
 
-Since the SFS strictly only considers SNPs without missing data, most of the SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data can be downsampled to the number of chromosomes (haploid samples) that maximises the number of SNPs without missing data. The amount of missing data heavily relies on the quality of the sequence (sequencing depth).
+Since the SFS strictly only considers SNPs without missing data, many SNPs can be lost when all the individuals in a VCF file are used to generate the SFS. To avoid this, the data can be downsampled to the number of chromosomes (haploid samples) that maximises the number of SNPs without missing data. The amount of missing data heavily relies on the quality of the sequence (sequencing depth). Since we were interested in retaining rare alleles, we didn't downsample the VCF files after checking that the number of SNPs didn't drastically drop due to the missing data.
 
-```easySFS``` is a Python script (available at <https://github.com/isaacovercast/easySFS>) that generates a SFS file from a VCF file and a tab-delimited population specification file. The later file contains the sample names in the first column and the corresponding population names in the second column. This file can be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
-
-```
-perl getpopmap.pl input.vcf popmap.txt NamePop1 NamePop2 NamePop3
-```
-
-The first argument is the name of the input VCF file, the second argument is the name of the output popmap file, and the following two or three arguments are the names of the populations. Beware the names of the samples in the VCF file should start with the population name followed by a hyphen.
-
-
-Since the data should be downsampled before running ```easySFS``` to maximise the number of SNPs without missing data, the program should be run in preview mode first. This way, it is possible to visualize the amount of SNPs that are kept using a certain number of chromosomes or haploid samples, herein projections: 
+We used the functions ```vcf2dadi``` and ```dadi2fsc.2pop``` from the R script [vcf2sfs.r](fastsimcoal2/vcf2sfs.r) (April 13th, 2016 version by Shenglin Liu. Repository available at <https://github.com/shenglin-liu/vcf2sfs>). Along the VCF file, ```vcf2dadi``` requires a tab-delimited population specification file. It contains the sample names (as specified in the VCF file) in the first column and the corresponding population name in the second column. This file can be directly generated from the VCF file using the custom Perl script ```getpopmap.pl```. It works for files containing either two or three populations.
 
 ```
-easySFS.py -i input.vcf -p popmap.txt --preview -a
+perl getpopmap.pl D00_H00.vcf D00_H00.popmap D00 H00
 ```
 
-The prompted output looks like this:
+The first argument is the name of the input VCF file, the second argument is the name of the output popmap file, and the following two or three arguments are the names of the populations. Please note that the names of the samples in the VCF file should start with the population name followed by a hyphen. ```vcf2dadi``` and ```dadi2fsc.2pop``` are run sequentially in R. The SFS file should be named *D00_H00_jointMAFpop1_0.obs* to be read by ```fastsimcoal2```.
 
 ```
-Pop1
-(2, 45.0)   (3, 59.0)   (4, 58.0)   (5, 59.0)   (6, 61.0)   (7, 65.0)   (8, 57.0)   (9, 50.0)   (10, 43.0)
-
-Pop2
-(2, 68.0)   (3, 96.0)   (4, 106.0)  (5, 110.0)  (6, 118.0)  (7, 109.0)   (8, 106.0)   (9, 96.0)   (10, 86.0)
+source("[PATH]/vcf2sfs.r")
+vcf2dadi("D00_H00.vcf", "D00_H00.popmap", "D00_H00.dadi", c("D00", "H00"), ploidy=2, n.digit=4, filter.indi=NA, filter.snp=0)
+dadi2fsc.2pop("D00_H00.dadi", "D00_H00_jointMAFpop1_0.obs", c("D00", "H00"), fold=T)
 ```
-
-The first number in parenthesis corresponds to the number of projections and the second number corresponds to the number of kept SNPs by using the respective projections. In this example, projections *7* and *6* maximise the number of kept SNPs in population 1 and 2, respectively. These numbers should be specified with the ```--proj``` flag in the next step. The ```-a``` flag means all the SNPs are considered, otherwise, a single SNP is randomly sampled per locus. The ```-o``` flag specifies the output directory.
-
-```
-easySFS.py -i input.vcf -p popmap.txt --proj 7,6 -o output_directory -a
-```
-
-```easySFS``` generates several SFS files by default in two directories contained in the main output directory. Since ```fastsimcoal``` is picky with the format and naming pattern of the input files, you should use the joint SFS files contained in the directory called *fastsimcoal*. Beware these files should be slightly renamed to be read by ```fastsimcoal```. The two numbers at the end of the file name should be swapped, the greater number being first. For instance, *POP1_POP2_jointMAFpop0_1.obs* should be renamed as *POP1_POP2_jointMAFpop1_0.obs*.
 
 ## Getting the template file
 
