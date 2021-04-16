@@ -392,13 +392,22 @@ summary(lm(FstSkMeanLOG~GeodistLOGkm, data=IBD_sm))
 
 # Gene flow detection with fastsimcoal
 
-```fastsimcoal``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we restrict its use to population pairs and triads of interest given their phylogenetic relationships and occurrence patterns.
+```fastsimcoal``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. Since this approach requires the a priori formulation of the demographic models to test, we tested 10 demographic models (see below) in 30 population pairs of interest given their ecology, phylogenetic relationships, and occurrence patterns:
+
+  + Dune-Headland pairs (DH): D00-H00, D01-H01, D03-H02, D04-H05, D05-H06, D12-H14, D14-H15, D32-H12.
+  + Dune-Dune pairs (DD): D00-D02, D01-D03, D01-D04, D02-D03, D04-D05, D05-D12, D12-D14, D14-D32.
+  + Headland-Headland pairs (HH): H00-H02, H01-H04, H01-H05, H02-H04, H03-H07, H03-H14, H05-H06, H06-H07, H12-H12A, H12-H15, H14-H15.
+  + Allopatric pairs (Allo): D03-D32, D03-H12, H02-H12.
 
 ```fastsimcoal``` requires three input files: 
 
   + A site frequency spectrum file.
   + A *template* file.
   + An *estimation* file.
+
+All the ```fastsimcoal``` input files used in this study are available at [James_et_al._2021-MBE-fastsimcoal2_files](fastsimcoal2/James_et_al._2021-MBE-fastsimcoal2_files.zip)
+
+Please note that the header of the template files makes reference to migration pattern backward in time whereas in the paper model names and migration rates are presented forward in time.
 
 ## Getting the site frequency spectrum (SFS) file
 
