@@ -509,13 +509,13 @@ In this file, *HEAD*, *DUNE*, *H2D*, *D2H*, *TDIV*, *RESIZE*, and *TSEC* are the
 
 The *estimation* file specifies the search range of the parameters defined in the *template* file. The lower range limit is an absolute minimum, whereas the upper range is only used as a maximum for choosing a random initial value for the parameter. It is divided into three fixed sections in the following order:
   
-  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either be recorded or omitted in the output files. Some parameters, such as *ANCSIZE*, are specified in this section despite not being invoked in the *template* file. This is because they are later used to calculate other complex parameters that were specified in the *template* file, such as *RESIZE* (see below).
+  + Parameters: It lists the main parameters and its respective initial search range. Each parameter can either be uniformly or log-uniformly distributed and its values can be either recorded or omitted in the output files. Some parameters, such as *ANCSIZE*, are specified in this section despite not being invoked in the *template* file. This is because they are later used to calculate other complex parameters that were specified in the *template* file, such as *RESIZE* (see below).
   
   + Rules: It includes a set of conditions to be met among the above simple parameters. For instance, in a secondary contact model, it should be specified that the secondary contact event happened after the divergence of the involved populations. 
   
-  + Complex parameters: It defines parameters that are obtained as simple operations between other parameters. For instance, the migration rate *MIG12* is calculated as the number of migrants *NM12* divided by the population size of the source population *NPOP1*.
+  + Complex parameters: It defines parameters that are obtained as simple operations between other parameters. For instance, the migration rate *H2D* is calculated as the number of migrants *HtoD* divided by the population size of the source population *HEAD*.
   
-The name of the *estimation* file must be the root name of the SFS file plus the extension *.est*. For instance, the corresponding *estimation* file name of the *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.est*. Sample estimation files for the *D00_H00* pair are in the directory ```EstimationFiles/Pair``` and for the *D32-H12-H12A* triad are in the directory ```EstimationFiles/Triad```.
+The name of the *estimation* file must be the root name of the SFS file plus the extension *.est*. For instance, the corresponding *estimation* file name of the *D00_H00_jointMAFpop1_0.obs* SFS should be *D00_H00.est*.
 
 This is how an *estimation* file for a population pair looks like:
 
@@ -527,10 +527,10 @@ This is how an *estimation* file for a population pair looks like:
 //#isInt? #name   #dist.#min  #max
 //all N are in number of haploid individuals
 1  ANCSIZE     unif     100  100000   output
-1  NPOP1       unif     100  100000   output
-1  NPOP2       unif     100  100000   output
-0  NM12       logunif  1e-2 20       hide
-0  NM21       logunif  1e-2 20       hide
+1  HEAD       unif     100  100000   output
+1  DUNE       unif     100  100000   output
+0  HtoD       logunif  1e-2 20       hide
+0  DtoH       logunif  1e-2 20       hide
 1  TDIV        unif     100   20000   output
 1  TSEC        unif     100   20000   output
 
@@ -539,48 +539,9 @@ TDIV > TSEC
 
 [COMPLEX PARAMETERS]
 
-0  RESIZE = ANCSIZE/NPOP2     hide
-0  MIG12  = NM12/NPOP1       output
-0  MIG21  = NM21/NPOP2       output
-```
-
-And this is how an *estimation* file for a population triad looks like:
-
-```
-// Priors and rules file
-// *********************
-
-[PARAMETERS]
-//#isInt? #name   #dist.#min  #max
-//all N are in number of haploid individuals
-1  ANCSIZE     unif     100  100000   output
-1  HSIZE     unif     100  100000   output
-1  D32       unif     100  100000   output
-1  H12       unif     100  100000   output
-1  HA12       unif     100  100000   output
-1  TDIV1        unif     100   20000   output
-1  TDIV2        unif     100   20000   output
-0  NM12       logunif  1e-2 20       hide
-0  NM21       logunif  1e-2 20       hide
-0  NM13       logunif  1e-2 20       hide
-0  NM31       logunif  1e-2 20       hide
-0  NM23       logunif  1e-2 20       hide
-0  NM32       logunif  1e-2 20       hide
-
-[RULES]
-
-TDIV1 < TDIV2
-
-[COMPLEX PARAMETERS]
-
-0  RESIZE1 = HSIZE/D32     hide
-0  RESIZE2 = ANCSIZE/HSIZE     hide
-0  MIG12  = NM12/D32       output
-0  MIG21  = NM21/H12       output
-0  MIG13  = NM13/D32       output
-0  MIG31  = NM31/HA12       output
-0  MIG23  = NM23/H12       output
-0  MIG32  = NM32/HA12       output
+0  RESIZE = ANCSIZE/DUNE     hide
+0  H2D  = HtoD/HEAD       output
+0  D2H  = DtoH/DUNE       output
 ```
 
 ## Running fastsimcoal
