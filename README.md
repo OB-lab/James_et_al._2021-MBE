@@ -394,12 +394,25 @@ summary(lm(FstSkMeanLOG~GeodistLOGkm, data=IBD_sm))
 
 ```fastsimcoal2``` (available at <http://cmpg.unibe.ch/software/fastsimcoal2/>) is a continuous-time coalescent simulator of genomic diversity under arbitrarily complex evolutionary scenarios. It can estimate demographic parameters from the site frequency spectrum through a composite likelihood maximisation procedure. 
 
-We use ```fastsimcoal2``` to test 10 demographic models (see below) in 30 population pairs of interest given their ecology, phylogenetic relationships, and occurrence patterns:
+We used ```fastsimcoal2``` to test 10 demographic models (see below) in 30 population pairs of interest given their ecology, phylogenetic relationships, and occurrence patterns:
 
   + Dune-Headland pairs: D00-H00, D01-H01, D03-H02, D04-H05, D05-H06, D12-H14, D14-H15, D32-H12.
   + Dune-Dune pairs: D00-D02, D01-D03, D01-D04, D02-D03, D04-D05, D05-D12, D12-D14, D14-D32.
   + Headland-Headland pairs: H00-H02, H01-H04, H01-H05, H02-H04, H03-H07, H03-H14, H05-H06, H06-H07, H12-H12A, H12-H15, H14-H15.
   + Allopatric pairs: D03-D32, D03-H12, H02-H12.
+
+The ten demographic models were:
+
+  + M1: No migration.
+  + M2: Bidirectional migration.
+  + M3: Population 2 to population 1 migration.
+  + M4: Population 1 to population 2 migration.
+  + M5: Bidirectional migration after secondary contact. 
+  + M6: Population 2 to population 1 migration after secondary contact.
+  + M7: Population 1 to population 2 migration after secondary contact.
+  + M8: bidirectional migration after population splitting with cessation of gene flow.
+  + M9: Ancient bidirectional secondary contact 
+  + M10: Population size reduction after bidirectional secondary contact.
 
 To run each model, ```fastsimcoal2``` requires three input files:
 
@@ -411,7 +424,7 @@ All the ```fastsimcoal2``` input files used in this study are available at [Jame
 
 Please note that the header of the template file for models 3, 4, 6, and 7 makes reference to the migration direction backward in time whereas in the paper both the name of the models and migration rates are presented forward in time. Also, population 1 and population 2 follow the order assigned in the population pair name. For instance, for the population pair D00-H00, D00 is refered here as population 1 and H00 as population 2. Population 1 corresponds to the rows of the SFS file and is labeled as DUNE in the template and estimation files. Population 2 corresponds to the columns of the SFS file and is labeled as HEAD in the template and estimation files. Both sample and population sizes are in haploid numbers. 
 
-The rest of this document names the files and command arguments using population pair D00-H00 as an example.
+The rest of this document uses the population pair D00-H00 as an example to name the files and command arguments.
 
 ## Getting the site frequency spectrum (SFS) file
 
@@ -441,7 +454,7 @@ The *template* file specifies the evolutionary model and the parameters that sho
 
   + Number of populations.
   
-  + Population effective sizes: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated. The population in the first line should correspond to the columns in the SFS file and the population in the second line to the one in the rows of the SFS file. The order of the populations in the SFS file is alphabetically sorted based on the population names. The program indexes the first population as 0 and the second one as 1.
+  + Population effective sizes: It should contain one line per population. If the effective population size is unknown, a parameter name should be specified instead to be calculated. The population in the first line should correspond to the one in the columns of the SFS file and the population in the second line to the one in the rows of the SFS file. The order of the populations in the SFS file is alphabetically sorted based on the population names. The program indexes the first population as 0 and the second one as 1.
   
   + Sample sizes: It should contain one line per population in the order specified in the previous section.
   
@@ -554,7 +567,7 @@ fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
 
 The ```-t``` and  ```-e``` flags specify the *template* and *estimation* files, respectively, the ```-n``` flag specifies the number of SFS simulations to fit to the data, the ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, the ```-L``` flag specifies the number of optimisation cycles, the ```-c``` flag specifies the number of threads to be used for simulations, and the ```-q``` flag keeps output messages at the minimum level.
 
-Reaching reliable results depends to some extent on how well the parameter space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates multiple directories (one for each independent run) and copies the input files into them before launching the independent runs.
+Reaching reliable results depends to some extent on how well the parameter space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates multiple directories (one for each independent run per model) and copies the input files into them before launching the independent runs.
 
 ```
 perl mkdir_in.pl 10 50
@@ -570,7 +583,9 @@ qsub runD00_H00.sh
 
 ## Summarising the results
 
-```fastsimcoal2``` generates an output directory per run, named as the root name of the input files (*i.e. D00_H00*), that contains the relevant output files. *D00_H00.bestlhoods* is particularly useful for summarising the estimated parameter values and *D00_H00.brent_lhoods* for evaluating the run performance over the optimisation cycles. The custom Perl script ```extract_ml.pl``` reads the *D00_H00.bestlhoods* file across all the runs per model and extracts their maximum likelihood value in a table, exported in the output file *reuslts_D00_H00_bestlhoods.txt*. Based on those values, it identifies the maximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_D00_H00```. The name of those files are modified to distinguish them among models.
+```fastsimcoal2``` generates an output directory per run, named as the root name of the input files (*i.e. D00_H00*). Within this directory, *D00_H00.bestlhoods* is particularly useful for summarising the estimated parameter values and *D00_H00.brent_lhoods* for evaluating the run performance over the optimisation cycles. 
+
+The custom Perl script ```extract_ml.pl``` reads the *D00_H00.bestlhoods* file across all the runs per model and extracts their maximum likelihood value in a table, exported in the output file *results_D00_H00_bestlhoods.txt*. Based on those values, it identifies the maximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_D00_H00```. The name of those files are modified to distinguish them among models.
 
 ```
 perl extract_ml.pl 10 50 D00_H00
@@ -578,7 +593,7 @@ perl extract_ml.pl 10 50 D00_H00
 
 The first argument corresponds to the number of models, the second argument corresponds to the number of independent runs per model, and the third argument corresponds to the root name of the files. ```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive numbers from 1 to the maximum number of different models. 
 
-The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal2``` runs across the different models. It generates a PDF file showing boxplots of the maximum likelihood values of all runs per model and scatter plots of the likelihood values along the optimisation cycles of the best run per model. By inspecting these plots, we can get a general idea about the overall performance of the parameter space exploration. This is how the plots look like:
+The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal2``` runs across the different models. It generates a PDF file showing a boxplot of the maximum likelihood values of all runs per model and a scatter plot of the likelihood values along the optimisation cycles of the best run per model. This is how the plots look like:
 
 ![Alt text](images/models_likelihoods1.png?raw=true "Title")
 
@@ -609,7 +624,7 @@ For simulating the DNA and SFS of the chosen model, the parameter values of its 
 FREQ 1 0 1e-8
 ```
 
-They should be slightly modified to specify that a DNA sequence, representing a given number (*i.e.* 10,000) of independent loci of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the new *parameter* file should look like:
+They should be slightly modified to specify that a DNA sequence, representing a given number of independent loci (*i.e.* 10,000) of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the new *parameter* file should look like:
 
 ```
 //Number of independent loci [chromosome] 
@@ -620,7 +635,7 @@ They should be slightly modified to specify that a DNA sequence, representing a 
 DNA 100 0 1e-8 OUTEXP
 ```
 
-Please not that after editing the D00_H00_maxL.par it should be renamed as D00_H00.par and put in a new directory along with the original SFS (*D00_H00_jointMAFpop1_0.obs*) and template (*D00_H00.tpl*) files. The parameter values file (*D00_H00.pv*) from the best run of the chosen model should be included in this new directory as well.
+Please note that after editing the D00_H00_maxL.par it should be renamed as D00_H00.par and put in a new directory along with the original SFS (*D00_H00_jointMAFpop1_0.obs*) and *template* (*D00_H00.tpl*) files. The *parameter values* file (*D00_H00.pv*) from the best run of the chosen model should be included in this new directory as well.
 
 The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal2``` to simulate the specified number of SFS files in independent directories and then copies the  *estimation*, *template*, and *parameter values* files to the newly created directories. The *parameter values* file is used to specify the initial parameter values of the new runs. ```runboot1.pl``` should be invoqued from the newly created directory.
 
@@ -628,19 +643,19 @@ The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal2``` to s
 perl runboot1.pl D00_H00 100
 ```
 
-The first argument corresponds to the name of the population pair and the second argument to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_D00_H00.sh``` recalculates the parameter values given the simulated SFS. 
+The first argument corresponds to the name of the population pair and the second argument to the number of bootstrap replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_D00_H00.sh``` recalculates the parameter values given the simulated SFS. 
 
 ```
 qsub runboot_D00_H00.sh
 ```
 
-The custom Perl script ```runboot2.pl``` extracts the parameter values of all the bootstrap runs in a text file named *D00_H00_boot.txt*.
+The custom Perl script ```runboot2.pl``` extracts the parameter values from all the bootstrap runs in a text file named *D00_H00_boot.txt*.
 
 ```
 perl runboot2.pl D00_H00 100
 ```
 
-Please note that the order of the columns in *D00_H00_boot.txt* corresponds to the output parameters order in the *estimation* file. For instance, for the above shown *D00_H00.est* file (model 5) it would be: ANCSIZE, HEAD, DUNE, TDIV, TSEC, H2D, D2H.
+Please note that the order of the columns in *D00_H00_boot.txt* corresponds to the order of the output parameters specified in the *estimation* file. For instance, for the *D00_H00.est* file (model 5, as shown above) it would be: ANCSIZE, HEAD, DUNE, TDIV, TSEC, H2D, D2H.
 
 The 95% confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. The R script ```getIC.R``` shows how to do it when model 5 is the best model.
 
@@ -648,15 +663,15 @@ The 95% confidence intervals of every parameter can be estimated in ```R``` envi
 
 As ```fastsimcoal2``` uses simulations to approximate the likelihood values, there is variance in the likelihood estimates. Since we are interested in detecting gene flow between the population pairs, it is possible that our best model and an alternative model with exacly the same parameter values but without or very low gene flow are indistinguishable. To test this, we compared the likelihood distribution of the best model with the likelihood distributions of a set of alternative models with very low gene flow (2Nm = 0.01, that is one migrant every 100 generations).
 
-For instance, when bidirectional migration after secondary contact (model 5) was the best model, there were three alternative models where either Dune to Headland migration rate (alternative model A) or Headland to Dune migration rate (alternative model B), or both (alternative model C), were constrained to be 2Nm = 0.01. To do this, either H2D or D2H values, or both, should be edited in the *D00_H00_maxL.par* file with the equivalent proportion of migrants sent backwards in time (estimated as 0.01/(haploid size of the source population/2)).
+For instance, when bidirectional migration after secondary contact (model 5) was the best model, there were three alternative models: either Dune to Headland migration rate (alternative model A) or Headland to Dune migration rate (alternative model B), or both (alternative model C), were constrained to be 2Nm = 0.01. To do this, either H2D or D2H values, or both, should be edited in the migration matrix of the *D00_H00_maxL.par* file. Please note that those values should correspond to the equivalent proportion of migrants sent backwards in time, not the actual number of migratns (it can be estimated as 0.01/(haploid size of the source population/2)).
 
 To estimate the likehood distribution of the best model and the three alternative models in ```fastsimcoal2```, we need one *parameter* file per model: *D00_H00_maxL.par* (best model), *D00_H00_A.par*, *D00_H00_B.par*, and *D00_H00_C.par*. For each one of these files, we need a copy of the original SFS file named accordingly: *D00_H00_maxL_jointMAFpop1_0.obs*, *D00_H00_A_jointMAFpop1_0.obs*, *D00_H00_B_jointMAFpop1_0.obs*, and *D00_H00_C_jointMAFpop1_0.obs*. All these files should be in the same folder.
 
-The custom Bash file ```mldist_D00_H00.sh``` iteratively runs ```fastsimcoal2``` to produce the produce a distribution of 100 likelihood values for each model: *D00_H00.maxL.lhoods*, *D00_H00.A.lhoods*, *D00_H00.B.lhoods*, and *D00_H00.C.lhoods*. 
+The custom Bash file ```mldist_D00_H00.sh``` iteratively runs ```fastsimcoal2``` to produce a distribution of 100 likelihood values for each model: *D00_H00.maxL.lhoods*, *D00_H00.A.lhoods*, *D00_H00.B.lhoods*, and *D00_H00.C.lhoods*. 
 
 ```
 qsub mldist_D00_H00.SH
 ```
-The custom R script ```mldist_plot.R``` read the output files and plot thei likelihood distribution of all the models. If the likelihood distribution of the alternative models overlap with the likelihood ditribution of the best model, it means that there is no significant differences between the fit of both models.
+The custom R script ```mldist_plot.R``` read the output files and plot the likelihood distribution of each model. If the likelihood distribution of any of the alternative models overlap with the likelihood ditribution of the best model, it means that there is no significant differences between the fit of both models.
 
 ![Alt text](images/alternative_models.png?raw=true "Title")
