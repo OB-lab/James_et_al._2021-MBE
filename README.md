@@ -581,6 +581,8 @@ The first argument corresponds to the number of models, the second argument corr
 The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal2``` runs across the different models. It generates a PDF file showing boxplots of the maximum likelihood values of all runs per model and scatter plots of the likelihood values along the optimisation cycles of the best run per model. By inspecting these plots, we can get a general idea about the overall performance of the parameter space exploration. This is how the plots look like:
 
 ![Alt text](images/models_likelihoods1.png?raw=true "Title")
+
+
 ![Alt text](images/models_likelihoods2.png?raw=true "Title")
 
 ## Selecting the best demographic models
@@ -592,14 +594,11 @@ For a given model **i**, its Akaike weight **w <sub>i</sub>** is equal to **exp(
 
 ```Δ``` being the difference between the AIC value of a particular model and the AIC value of the best model of the set and **R** being the total number of models in the set.  The Akaike weight values of all the models should sum up 1.0. It is read as the weight of evidence in favour of the model assuming that the actual best model is present in the set of models.
 
-The files containing the AIC values (*\*.bestlhood*) of the best run per model were extracted in a new directory by running the custom Perl script ```extract_ml.pl``` as shown above. 
-
-
 ## Estimating the confidence intervals
 
 We calculated the confidence intervals for the parameters of the model that had an Akaike weight greater than 0.50 using parametric bootstrap. This approach simulates DNA sequences, and their corresponding SFS, given the chosen model and the parameter values of its best run. Then, it recalculates the parameter values from the simulated SFS. This process was done 100 times.
 
-For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* (*\*.par*) input file. This file can be generated editing the *maximum likelihood parameter* file (*\*_maxL.par*) output by ```fastsimcoal```. The last three sections of this file usually look like:
+For simulating the DNA and SFS of the chosen model, the parameter values of its best run should be specified in a *parameter* (*\*.par*) input file. This file can be generated editing the *maximum likelihood parameter* file (*\*_maxL.par*) output by ```fastsimcoal2```. The last three sections of this file usually look like:
 
 ```
 //Number of independent loci [chromosome] 
@@ -610,7 +609,7 @@ For simulating the DNA and SFS of the chosen model, the parameter values of its 
 FREQ 1 0 1e-8
 ```
 
-They should be slightly modified to specify that a DNA sequence, representing a given number (*i.e.* 10,000) of independent loci of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the *parameter* file should look like:
+They should be slightly modified to specify that a DNA sequence, representing a given number (*i.e.* 10,000) of independent loci of a particular length (*i.e.* 100 bp), should be simulated. After this, those sections of the new *parameter* file should look like:
 
 ```
 //Number of independent loci [chromosome] 
@@ -621,31 +620,31 @@ They should be slightly modified to specify that a DNA sequence, representing a 
 DNA 100 0 1e-8 OUTEXP
 ```
 
-The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal``` to simulate the specified number of SFS files in independent directories and then copies the  *estimation*, *template*, and *parameter values* (\*.pv) files of the chosen model to the newly created directories. Those three files of the best run of the chosen model should be previously copied to the working directory. The *parameter values* file is used to specify the initial parameter values of the new runs.
+Please not that after editing the D00_H00_maxL.par it should be renamed as D00_H00.par and put in a new directory along with the original SFS (*D00_H00_jointMAFpop1_0.obs*) and template (*D00_H00.tpl*) files. The parameter values file (*D00_H00.pv*) from the best run of the chosen model should be included in this new directory as well.
+
+The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal2``` to simulate the specified number of SFS files in independent directories and then copies the  *estimation*, *template*, and *parameter values* files to the newly created directories. The *parameter values* file is used to specify the initial parameter values of the new runs. ```runboot1.pl``` should be invoqued from the newly created directory.
 
 ```
-perl runboot1.pl POP1_POP2 100
+perl runboot1.pl D00_H00 100
 ```
 
-The first argument corresponds to the root name of the population pair or triad and the second argument corresponds to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_POP1_POP2.sh``` recalculates the parameter values given the simulated SFS. 
+The first argument corresponds to the name of the population pair and the second argument to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_POP1_POP2.sh``` recalculates the parameter values given the simulated SFS. 
 
 ```
-qsub runboot_POP1_POP2.sh
+qsub runboot_D00_H00.sh
 ```
 
-The custom Perl script ```runboot2.pl``` extracts the parameter values of all the replicate runs in a text file.
+The custom Perl script ```runboot2.pl``` extracts the parameter values of all the bootstrap runs in a text file named *D00_H00_boot.txt*.
 
 ```
 perl runboot2.pl POP1_POP2 100
 ```
 
-The 95% confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. 
+Please note that the order of the columns in *D00_H00_boot.txt* corresponds to the output parameters order in the *estimation* file. For instance, for the above shown *D00_H00.est* file (model 5) it would be: ANCSIZE, HEAD, DUNE, TDIV, TSEC, H2D, D2H.
 
-```
-groupwiseMean(Vi ~ 1, 
-              data=Table, 
-              conf=0.95, 
-              digits=6)
-```
+The 95% confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. The R script ```getIC.R``` shows how to do it when model 5 is the best model.
 
-Where ```Vi``` corresponds to the column name of the parameter of interest (*i.e.* V1 for ancestral size) and ```Table``` corresponds to the matrix containing the parameter values of all the replicates. 
+## Testing alternative models with very low gene flow
+
+
+
