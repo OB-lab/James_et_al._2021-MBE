@@ -570,17 +570,18 @@ qsub runD00_H00.sh
 
 ## Summarising the results
 
-```fastsimcoal``` generates an output directory, named as the root name of the input files (*i.e. POP1_POP2*), that contains the relevant output files. *POP1_POP2.bestlhoods* is particularly useful for summarising the estimated parameter values and *POP1_POP2.brent_lhoods* for evaluating the run performance over the optimisation cycles. The custom Perl script ```extract_ml.pl``` reads the *POP1_POP2.bestlhoods* across all the runs per model and extracts their maximum likelihood value in a table. Based on those values, it identifies the maximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_POP1_POP2```. The name of those files are modified to distinguish among models.
+```fastsimcoal2``` generates an output directory per run, named as the root name of the input files (*i.e. D00_H00*), that contains the relevant output files. *D00_H00.bestlhoods* is particularly useful for summarising the estimated parameter values and *D00_H00.brent_lhoods* for evaluating the run performance over the optimisation cycles. The custom Perl script ```extract_ml.pl``` reads the *D00_H00.bestlhoods* file across all the runs per model and extracts their maximum likelihood value in a table, exported in the output file *reuslts_D00_H00_bestlhoods.txt*. Based on those values, it identifies the maximum likelihood run per model and extracts its *\*.bestlhoods* and *\*.brent_lhoods* files in a new directory named ```results_D00_H00```. The name of those files are modified to distinguish them among models.
 
 ```
-perl extract_ml.pl 7 75 D00_H00
+perl extract_ml.pl 10 50 D00_H00
 ```
 
 The first argument corresponds to the number of models, the second argument corresponds to the number of independent runs per model, and the third argument corresponds to the root name of the files. ```extract_ml.pl``` should be invoked from the location that contains all the models in separate directories named as consecutive numbers from 1 to the maximum number of different models. 
 
-The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal``` runs across the different models and population pairs and triads. It generates a PDF file showing boxplots of the maximum likelihood values of all runs per model per population pair and triad in the first section and scatter plots of the likelihood values along the optimisation cycles of the best run per model per population pair and triad in the second section. By inspecting these plots, we can get a general idea about the overall performance of the parameter space exploration. This is how the plots look like:
+The custom R script ```summaryplots_fsc.R``` graphically summarises the performance of the ```fastsimcoal2``` runs across the different models. It generates a PDF file showing boxplots of the maximum likelihood values of all runs per model and scatter plots of the likelihood values along the optimisation cycles of the best run per model. By inspecting these plots, we can get a general idea about the overall performance of the parameter space exploration. This is how the plots look like:
 
-![Alt text](plot_fsc_performance.jpg?raw=true "Title")
+![Alt text](images/models_likelihoods1.png?raw=true "Title")
+![Alt text](images/models_likelihoods2.png?raw=true "Title")
 
 ## Selecting the best demographic models
 
