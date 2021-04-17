@@ -9,7 +9,7 @@ use warnings;
 use strict;
 
 # Run fsc to simulate the specified number of SFS from a parameter file
-system ("/home/uqharena/fsc26_linux64/fsc26 -i $ARGV[0].par -n$ARGV[1] -j -m -s0 -x -I -q");
+system ("[PATH]/fsc26 -i $ARGV[0].par -n$ARGV[1] -j -m -s0 -x -I -q");
 
 # Copy the initial parameter values, template, and estimation files to the newly created directories containing the simulated SFS
 my $rep = 1;
