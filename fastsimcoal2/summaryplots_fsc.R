@@ -1,6 +1,6 @@
 # summaryplots_fsc.R visually summarises the performance of fastsimcoal2 runs across different models
 
-# Set the path to the main directory that contain all the pairs and triads directories
+# Set the path to the main directory
 PATH <- "PATH_TO_MAIN_DIRECTORY" # Replace with the path to the results directory output by extract_ml.pl Perl script
 pair <- "D00_H00" # Replace with the name of the population pair of interest
 
