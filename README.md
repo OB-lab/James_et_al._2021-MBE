@@ -546,7 +546,7 @@ TDIV > TSEC
 
 ## Running fastsimcoal
 
-Running ```fastsimcoal``` is easy if the three input files are well formatted. All the files should be in the same directory from where the command is invoked. 
+Running ```fastsimcoal2``` is easy if the three input files are well formatted. All the files should be in the same directory from where the command is invoked. 
 
 ```
 fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
@@ -554,19 +554,19 @@ fsc26 -t D00_H00.tpl -n100000 -m -e D00_H00.est -M -L60 -c10 -q
 
 The ```-t``` and  ```-e``` flags specify the *template* and *estimation* files, respectively, the ```-n``` flag specifies the number of SFS simulations to fit to the data, the ```-M``` flag indicates to perform parameter estimation by maximum composite likelihood from the SFS, the ```-L``` flag specifies the number of optimisation cycles, the ```-c``` flag specifies the number of threads to be used for simulations, and the ```-q``` flag keeps output messages at the minimum level.
 
-Reaching reliable results depends to some extent on how well the parameter space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates the required directories and copies the input files into them for launching the independent runs.
+Reaching reliable results depends to some extent on how well the parameter space is explored. For this, every model should be independently run between 50 and 100 times and the results of the run with the maximum likelihood value should be picked up for further analysis. The custom Perl script ```mkdir_in.pl``` creates multiple directories (one for each independent run) and copies the input files into them before launching the independent runs.
 
 ```
-perl mkdir_in.pl 7 75
+perl mkdir_in.pl 10 50
 ```
 
-The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launched per model. Since testing the different models demands running ```fastsimcoal``` multiple times, it is best done in a server. The custom shell executable script ```runPOP1_POP2.sh``` executes the program in all the above created directories per model.
+The first argument corresponds to the number of models to test and the second argument indicates how many independent runs will be launched per model. Please note that this script should be invoked from a directory containing one folder per model named from 1 up to the total number of models. Each model directory should contain the three input files above mentioned.
+
+Since testing the different models demands running ```fastsimcoal2``` multiple times, this is best done in a server. The custom shell executable script ```runD00_H00.sh``` executes the program 50 times per model.
 
 ```
-qsub runPOP1_POP2.sh
+qsub runD00_H00.sh
 ```
-
-The population pairs and triads models were independently run 75 and 50 times, respectively. Both ```mkdir_in.pl``` and ```runPOP1_POP2.sh``` should be invoked from the location that contains all the models in separate directories named as consecutive numbers from 1 to the maximum number of different models. Each of them should contain the three input files for running ```fastsimcoal```. 
 
 ## Summarising the results
 
