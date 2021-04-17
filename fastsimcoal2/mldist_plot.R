@@ -16,6 +16,6 @@ if (min(maxL)<max(A,B,C)) {
   boxplot(maxL, A, B, C, main=paste(pair, " (overlap)"), names=c("maxL", "A", "B", "C"), 
           ylab="Log-likelihood", cex.lab=2, cex.axis=1.9, cex.main=2, xlab="Model")
 } else {boxplot(maxL, A, B, C, main=pair, names=c("maxL", "A", "B", "C"), 
-         ylab="Log-likelihood", cex.lab=2, cex.axis=1.8, cex.main=2)}	
+         ylab="Log-likelihood", cex.lab=2, cex.axis=1.8, cex.main=2, xlab="Model")}	
 
 dev.off()
