@@ -628,7 +628,7 @@ The custom Perl script ```runboot1.pl``` internally runs ```fastsimcoal2``` to s
 perl runboot1.pl D00_H00 100
 ```
 
-The first argument corresponds to the name of the population pair and the second argument to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_POP1_POP2.sh``` recalculates the parameter values given the simulated SFS. 
+The first argument corresponds to the name of the population pair and the second argument to the number of replicates. It can take a couple of minutes to run. The custom Bash file ```runboot_D00_H00.sh``` recalculates the parameter values given the simulated SFS. 
 
 ```
 qsub runboot_D00_H00.sh
@@ -637,7 +637,7 @@ qsub runboot_D00_H00.sh
 The custom Perl script ```runboot2.pl``` extracts the parameter values of all the bootstrap runs in a text file named *D00_H00_boot.txt*.
 
 ```
-perl runboot2.pl POP1_POP2 100
+perl runboot2.pl D00_H00 100
 ```
 
 Please note that the order of the columns in *D00_H00_boot.txt* corresponds to the output parameters order in the *estimation* file. For instance, for the above shown *D00_H00.est* file (model 5) it would be: ANCSIZE, HEAD, DUNE, TDIV, TSEC, H2D, D2H.
@@ -646,5 +646,17 @@ The 95% confidence intervals of every parameter can be estimated in ```R``` envi
 
 ## Testing alternative models with very low gene flow
 
+As ```fastsimcoal2``` uses simulations to approximate the likelihood values, there is variance in the likelihood estimates. Since we are interested in detecting gene flow between the population pairs, it is possible that our best model and an alternative model with exacly the same parameter values but without or very low gene flow are indistinguishable. To test this, we compared the likelihood distribution of the best model with the likelihood distributions of a set of alternative models with very low gene flow (2Nm = 0.01, that is one migrant every 100 generations).
 
+For instance, when bidirectional migration after secondary contact (model 5) was the best model, there were three alternative models where either Dune to Headland migration rate (alternative model A) or Headland to Dune migration rate (alternative model B), or both (alternative model C), were constrained to be 2Nm = 0.01. To do this, either H2D or D2H values, or both, should be edited in the *D00_H00_maxL.par* file with the equivalent proportion of migrants sent backwards in time (estimated as 0.01/(haploid size of the source population/2)).
 
+To estimate the likehood distribution of the best model and the three alternative models in ```fastsimcoal2```, we need one *parameter* file per model: *D00_H00_maxL.par* (best model), *D00_H00_A.par*, *D00_H00_B.par*, and *D00_H00_C.par*. For each one of these files, we need a copy of the original SFS file named accordingly: *D00_H00_maxL_jointMAFpop1_0.obs*, *D00_H00_A_jointMAFpop1_0.obs*, *D00_H00_B_jointMAFpop1_0.obs*, and *D00_H00_C_jointMAFpop1_0.obs*. All these files should be in the same folder.
+
+The custom Bash file ```mldist_D00_H00.sh``` iteratively runs ```fastsimcoal2``` to produce the produce a distribution of 100 likelihood values for each model: *D00_H00.maxL.lhoods*, *D00_H00.A.lhoods*, *D00_H00.B.lhoods*, and *D00_H00.C.lhoods*. 
+
+```
+qsub mldist_D00_H00.SH
+```
+The custom R script ```mldist_plot.R``` read the output files and plot thei likelihood distribution of all the models. If the likelihood distribution of the alternative models overlap with the likelihood ditribution of the best model, it means that there is no significant differences between the fit of both models.
+
+![Alt text](images/alternative_models.png?raw=true "Title")
