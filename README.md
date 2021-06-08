@@ -665,10 +665,12 @@ Population sizes (N) and migration rates (m) are output by ```fastsimcoal2``` in
 
 For instance, for the following parater values of the D00-H00 pair:
 
+```
 D00 pop size (Pop1size): 47,926
 H00 pop size (Pop2size): 134,364
 Migration backward in time from H00 to D00 (mP2->P1): 3.24E-06
 Migration backward in time from D00 to H00 (mP1->P2): 1.18E-05
+```
 
 The number of diploid migrants from D00 to H00 forward in time are:
 
