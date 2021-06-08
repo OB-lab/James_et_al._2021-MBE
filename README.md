@@ -659,6 +659,27 @@ Please note that the order of the columns in *D00_H00_boot.txt* corresponds to t
 
 The 95% confidence intervals of every parameter can be estimated in ```R``` environment using the function ```groupwiseMean``` of the ```rcompanion``` library. The R script ```getIC.R``` shows how to do it when model 5 is the best model.
 
+## Calculating the number of migrants per generation
+
+Population sizes (N) and migration rates (m) are output by ```fastsimcoal2``` in haploid numbers and backward in time, however we are interetested in calculating the number of diploid migrants from one population to other forward in time (2Nm). To do this, consider the migration rate from Headland to Dune. This is the probability of a Headland population sending haploid migrants to a Dune population backward in time. We multiplied it by the haploid population size of the Headland to get the number of haploid migrants from a Headland to a Dune backward in time. Then we halved this value to get the number of diploid migrants from a Headland to a Dune backward in time. This number is exactly as the number of diploid migrants from a Dune to a Headland population forward in time (2Nm).
+
+For instance, for the following parater values of the D00-H00 pair:
+
+D00 pop size (Pop1size): 47,926
+H00 pop size (Pop2size): 134,364
+Migration backward in time from H00 to D00 (mP2->P1): 3.24E-06
+Migration backward in time from D00 to H00 (mP1->P2): 1.18E-05
+
+The number of diploid migrants from D00 to H00 forward in time are:
+2NmP1->P2 = (mP2->P1 * Pop2size) / 2
+	        = (3.24E-06 * 134,364) /2
+      	        = 0.2176
+
+And the number of diploid migrants from H00 to D00 forward in time are:
+2NmP2->P1 = (mP1->P2 * Pop1size) / 2
+	        = (1.18E-05* 47,926) /2
+      	        = 0.2830
+
 ## Testing alternative models with very low gene flow
 
 As ```fastsimcoal2``` uses simulations to approximate the likelihood values, there is variance in the likelihood estimates. Since we are interested in detecting gene flow between the population pairs, it is possible that our best model and an alternative model with exacly the same parameter values but without or very low gene flow are indistinguishable. To test this, we compared the likelihood distribution of the best model with the likelihood distributions of a set of alternative models with very low gene flow (2Nm = 0.01, that is one migrant every 100 generations).
