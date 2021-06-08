@@ -671,14 +671,14 @@ Migration backward in time from H00 to D00 (mP2->P1): 3.24E-06
 Migration backward in time from D00 to H00 (mP1->P2): 1.18E-05
 
 The number of diploid migrants from D00 to H00 forward in time are:
-2NmP1->P2 = (mP2->P1 * Pop2size) / 2
-	        = (3.24E-06 * 134,364) /2
-      	        = 0.2176
+2NmP1->P2 	= (mP2->P1 * Pop2size) / 2
+		= (3.24E-06 * 134,364) /2
+		= 0.2176
 
 And the number of diploid migrants from H00 to D00 forward in time are:
-2NmP2->P1 = (mP1->P2 * Pop1size) / 2
-	        = (1.18E-05* 47,926) /2
-      	        = 0.2830
+2NmP2->P1 	= (mP1->P2 * Pop1size) / 2
+		= (1.18E-05* 47,926) /2
+		= 0.2830
 
 ## Testing alternative models with very low gene flow
 
