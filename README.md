@@ -173,7 +173,7 @@ vcftools --vcf all_joint.Q30mac1dp3irMaxDP100.recode.vcf --min-meanDP 10 --recod
 To ensure that each SNP is sequenced in every population, we filtered for missing data per population. We first created a file containing the individual name in the first column, and the population identifier in the second column: *all_inds_pops.txt*. For each population, the individual names were extracted into a separate file. 
 
 ```
-mawk '$2 == "D00"' all_inds_pops.txt > D00_keep && mawk '$2 == "D01"' all_inds_pops_mac1.txt > D01_keep && mawk '$2 == "D02"' all_inds_pops_mac1.txt > D02_keep
+mawk '$2 == "D00"' all_inds_pops.txt > D00_keep && mawk '$2 == "D01"' all_inds_pops.txt > D01_keep && mawk '$2 == "D02"' all_inds_pops.txt > D02_keep
 ```
 
 For each of the 23 populations we used VCFtools to calculate the proportion of missing data per variant site. The below lines of code are an example for three populations. They produce output files called *D00.lmiss*, *D01.lmiss* and *D02.lmiss*, the 6th column containing the proportion of missing data for each site. 
