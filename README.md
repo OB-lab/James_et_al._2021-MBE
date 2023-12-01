@@ -1,6 +1,6 @@
 
 This repository contains step-by-step instructions, code and data for:
-**James ME, Arenas-Castro H, Groh JS, Allen SL, Engelstaedter J and Ortiz-Barrientos D. (2021) Highly replicated evolution of parapatric ecotypes. *Molecular Biology and Evolution*. https://doi.org/10.1093/molbev/msab207**
+**James ME, Arenas-Castro H, Groh JS, Allen SL, Engelstaedter J and Ortiz-Barrientos D. (2021) Highly replicated evolution of parapatric ecotypes. *Molecular Biology and Evolution*. 38(11), 4805-4821. https://doi.org/10.1093/molbev/msab207**
 
 # DNA extraction and Genotyping-by-Sequencing
 
